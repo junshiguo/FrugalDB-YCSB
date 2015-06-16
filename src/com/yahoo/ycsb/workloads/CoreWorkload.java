@@ -86,7 +86,7 @@ public class CoreWorkload extends Workload
 	 */
 	public static final String FIELD_COUNT_PROPERTY_DEFAULT="10";
 
-	int fieldcount;
+	public int fieldcount;
 
 	/**
 	 * The name of the property for the field length distribution. Options are "uniform", "zipfian" (favoring short records), "constant", and "histogram".

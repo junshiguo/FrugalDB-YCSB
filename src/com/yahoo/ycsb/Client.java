@@ -130,192 +130,6 @@ class StatusThread extends Thread
 }
 
 /**
- * A thread for executing transactions or data inserts to the database.
- * 
- * @author cooperb
- *
- */
-class ClientThread extends Thread
-{
-	DB _db;
-	boolean _dotransactions;
-	Workload _workload;
-	int _opcount;
-	double _target;
-
-	int _opsdone;
-	int _threadid;
-	int _threadcount;
-	Object _workloadstate;
-	Properties _props;
-
-
-	/**
-	 * Constructor.
-	 * 
-	 * @param db the DB implementation to use
-	 * @param dotransactions true to do transactions, false to insert data
-	 * @param workload the workload to use
-	 * @param threadid the id of this thread 
-	 * @param threadcount the total number of threads 
-	 * @param props the properties defining the experiment
-	 * @param opcount the number of operations (transactions or inserts) to do
-	 * @param targetperthreadperms target number of operations per thread per ms
-	 */
-	public ClientThread(DB db, boolean dotransactions, Workload workload, int threadid, int threadcount, Properties props, int opcount, double targetperthreadperms)
-	{
-		//TODO: consider removing threadcount and threadid
-		_db=db;
-		_dotransactions=dotransactions;
-		_workload=workload;
-		_opcount=opcount;
-		_opsdone=0;
-		_target=targetperthreadperms;
-		_threadid=threadid;
-		_threadcount=threadcount;
-		_props=props;
-		//System.out.println("Interval = "+interval);
-	}
-
-	public int getOpsDone()
-	{
-		return _opsdone;
-	}
-
-	public void run()
-	{
-		try
-		{
-			_db.init();
-		}
-		catch (DBException e)
-		{
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			return;
-		}
-
-		try
-		{
-			_workloadstate=_workload.initThread(_props,_threadid,_threadcount);
-		}
-		catch (WorkloadException e)
-		{
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			return;
-		}
-
-		//spread the thread operations out so they don't all hit the DB at the same time
-		try
-		{
-		   //GH issue 4 - throws exception if _target>1 because random.nextInt argument must be >0
-		   //and the sleep() doesn't make sense for granularities < 1 ms anyway
-		   if ( (_target>0) && (_target<=1.0) ) 
-		   {
-		      sleep(Utils.random().nextInt((int)(1.0/_target)));
-		   }
-		}
-		catch (InterruptedException e)
-		{
-		  // do nothing.
-		}
-		
-		try
-		{
-			if (_dotransactions)
-			{
-				long st=System.currentTimeMillis();
-
-				while (((_opcount == 0) || (_opsdone < _opcount)) && !_workload.isStopRequested())
-				{
-
-					if (!_workload.doTransaction(_db,_workloadstate))
-					{
-						break;
-					}
-
-					_opsdone++;
-
-					//throttle the operations
-					if (_target>0)
-					{
-						//this is more accurate than other throttling approaches we have tried,
-						//like sleeping for (1/target throughput)-operation latency,
-						//because it smooths timing inaccuracies (from sleep() taking an int, 
-						//current time in millis) over many operations
-						while (System.currentTimeMillis()-st<((double)_opsdone)/_target)
-						{
-							try
-							{
-								sleep(1);
-							}
-							catch (InterruptedException e)
-							{
-							  // do nothing.
-							}
-
-						}
-					}
-				}
-			}
-			else
-			{
-				long st=System.currentTimeMillis();
-
-				while (((_opcount == 0) || (_opsdone < _opcount)) && !_workload.isStopRequested())
-				{
-
-					if (!_workload.doInsert(_db,_workloadstate))
-					{
-						break;
-					}
-
-					_opsdone++;
-
-					//throttle the operations
-					if (_target>0)
-					{
-						//this is more accurate than other throttling approaches we have tried,
-						//like sleeping for (1/target throughput)-operation latency,
-						//because it smooths timing inaccuracies (from sleep() taking an int, 
-						//current time in millis) over many operations
-						while (System.currentTimeMillis()-st<((double)_opsdone)/_target)
-						{
-							try 
-							{
-								sleep(1);
-							}
-							catch (InterruptedException e)
-							{
-							  // do nothing.
-							}
-						}
-					}
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			System.exit(0);
-		}
-
-		try
-		{
-			_db.cleanup();
-		}
-		catch (DBException e)
-		{
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			return;
-		}
-	}
-}
-
-/**
  * Main class for executing YCSB.
  */
 public class Client
@@ -326,6 +140,14 @@ public class Client
 	public static final String RECORD_COUNT_PROPERTY="recordcount";
 
 	public static final String WORKLOAD_PROPERTY="workload";
+	
+	public static final String WORKLOAD_FILE_FOR_FRUGALDB = "workloadfile_F";
+	
+	public static final String TOTAL_INTERVAL_FRUGALDB = "totalinterval_F";
+	public static final String TOTAL_INTERVAL_FRUGALDB_DEFAULT = "2";
+	
+	public static final String MINUTE_PER_INTERVAL_FRUGALDB = "minuteperinterval_F";
+	public static final String MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT = "5";
 	
 	/**
 	 * Indicates how many inserts to do, if less than recordcount. Useful for partitioning
@@ -338,6 +160,7 @@ public class Client
    * The maximum amount of time (in seconds) for which the benchmark will be run.
    */
   public static final String MAX_EXECUTION_TIME = "maxexecutiontime";
+
 
 	public static void usageMessage()
 	{
@@ -428,6 +251,13 @@ public class Client
 		}
 	}
 	
+	public static boolean START_TEST = false;
+	public synchronized static boolean checkStart(boolean toggle){
+		if(toggle){
+			START_TEST = !START_TEST;
+		}
+		return START_TEST;
+	}
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args)
 	{
@@ -743,14 +573,59 @@ public class Client
 		{
 			t.start();
 		}
+		/**
+		 * TODO: add control here, threads[i].checkOpcount();
+		 * read load.txt file
+		 * while (testing){
+		 * 		for each thread:
+		 * 			checkOpcount();
+		 * 		sleep(intervalTime);
+		 * }
+		 */
+		if(dotransactions){
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt")));
+				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
+				int minute_per_interval = Integer.parseInt(props.getProperty(MINUTE_PER_INTERVAL_FRUGALDB, MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
+				//start test signal
+				for(Thread t : threads){
+					((ClientThread)t).checkOpcount(-1);
+				}
+				Client.checkStart(true);
+				for(int interval = 0; interval < total_interval; interval++){
+					String line = reader.readLine();
+					if(line == null){
+						System.out.println("Fail to read from load file! Stopping...");
+						reader.close();
+						return;
+					}
+					String[] load = line.split("\\s+");
+					for(int i = 0; i < threads.size(); i++){
+						((ClientThread) threads.get(i)).checkOpcount(Integer.parseInt(load[i]));
+					}
+					for(int minute = 0; minute < minute_per_interval; minute++){
+						//TODO: report throughput (opsdone)
+					}
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			maxExecutionTime = 3000;
+		}else{
+			//do nothing
+		}
+		
 		
     Thread terminator = null;
     
+    //@ this para means the time to wait before stopping all threads after workload done
     if (maxExecutionTime > 0) {
       terminator = new TerminatorThread(maxExecutionTime, threads, workload);
       terminator.start();
     }
     
+    //TODO: opsDone needs to be int[], opdone in ClientThread should be changed accordingly
     int opsDone = 0;
 
 		for (Thread t : threads)

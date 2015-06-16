@@ -72,6 +72,9 @@ public abstract class DB
 	public void init() throws DBException
 	{
 	}
+	public void init(int id) throws DBException
+	{
+	}
 
 	/**
 	 * Cleanup any state for this DB.

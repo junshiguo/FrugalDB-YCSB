@@ -3,17 +3,25 @@ package frugaldb.workload;
 import java.util.Properties;
 
 import com.yahoo.ycsb.DB;
-import com.yahoo.ycsb.Workload;
 import com.yahoo.ycsb.WorkloadException;
+import com.yahoo.ycsb.workloads.CoreWorkload;
 
-public class FrugalDBWorkload extends Workload {
+/**
+ * currently all functions use super's implementation
+ * @author guojunshi
+ *
+ */
+public class FrugalDBWorkload extends CoreWorkload {
+	
+	public int getFieldCount(){
+		return this.fieldcount;
+	}
 
 	/**
      * Initialize the scenario. Create any generators and other shared objects here.
      * Called once, in the main client thread, before any operations are started.
      */
 	public void init(Properties p) throws WorkloadException {
-		// TODO Auto-generated method stub
 		super.init(p);
 	}
 
@@ -27,7 +35,10 @@ public class FrugalDBWorkload extends Workload {
      * in the returned object. If you have no state to retain for this thread, return null. (But if you have
      * no state to retain for this thread, probably you don't need to override initThread().)
      * 
-     * @return false if the workload knows it is done for this thread. Client will terminate the thread. Return true otherwise. Return true for workloads that rely on operationcount. For workloads that read traces from a file, return true when there are more to do, false when you are done.
+     * @return false if the workload knows it is done for this thread. 
+     * Client will terminate the thread. Return true otherwise. 
+     * Return true for workloads that rely on operationcount. 
+     * For workloads that read traces from a file, return true when there are more to do, false when you are done.
      */
 	public Object initThread(Properties p, int mythreadid, int threadcount)
 			throws WorkloadException {
@@ -52,7 +63,7 @@ public class FrugalDBWorkload extends Workload {
      */
 	public boolean doInsert(DB db, Object threadstate) {
 		// TODO Auto-generated method stub
-		return false;
+		return super.doInsert(db, threadstate);
 	}
 
 	/**
@@ -66,7 +77,7 @@ public class FrugalDBWorkload extends Workload {
      */
 	public boolean doTransaction(DB db, Object threadstate) {
 		// TODO Auto-generated method stub
-		return false;
+		return super.doTransaction(db, threadstate);
 	}
 
 }
