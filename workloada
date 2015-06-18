@@ -37,9 +37,10 @@ insertproportion=0
 requestdistribution=zipfian
 
 db.driver=com.mysql.jdbc.Driver
-db.url=jdbc:mysql://localhost:3306/ycsb
+db.url=jdbc:mysql://127.0.0.1/ycsb
 db.user=remote
 db.passwd=remote
+voltdbserver=127.0.0.1
 
 mmeasurementtype=timeseries
 

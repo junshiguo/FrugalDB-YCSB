@@ -48,7 +48,8 @@ public class FrugalDBClient extends DB {
 	//check connection can be called before each operation on db
 	public void checkMysqlConnection() throws SQLException{
 		if(mysqlConn == null || mysqlConn.isClosed()){
-			mysqlConn = DBManager.connectDB(DBConfig.url, DBConfig.username, DBConfig.password);
+			mysqlConn = DBManager.connectDB(this.getProperties().getProperty("db.url", "jdbc:mysql://127.0.0.1/ycsb"), 
+					this.getProperties().getProperty("db.user", "remote"), this.getProperties().getProperty("db.passwd", "remote"));
 			mysqlStmt = mysqlConn.createStatement();
 		}else if(mysqlStmt == null){
 			mysqlStmt = mysqlConn.createStatement();
@@ -57,7 +58,7 @@ public class FrugalDBClient extends DB {
 	
 	public void checkVoltdbConnection(){
 		if(voltdbConn == null){
-			voltdbConn = DBManager.connectVoltdb(DBConfig.voltdbServer);
+			voltdbConn = DBManager.connectVoltdb(this.getProperties().getProperty("voltdbserver", "127.0.0.1"));
 		}
 	}
 	
@@ -68,20 +69,13 @@ public class FrugalDBClient extends DB {
 	public void init(int id) throws DBException
 	{
 		this.idInMysql = id;
-		mysqlConn = DBManager.connectDB(DBConfig.url, DBConfig.username, DBConfig.password);
-		if(mysqlConn == null){
-			System.out.println("Mysql connect failed!");
-		}
 		try {
-			mysqlStmt = mysqlConn.createStatement();
+			checkMysqlConnection();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		if(checkInVoltdb(false, false)){
-			voltdbConn = DBManager.connectVoltdb(DBConfig.voltdbServer);
-			if(voltdbConn == null){
-				System.out.println("Voltdb connect failed!");
-			}
+			checkVoltdbConnection();
 		}
 	}
 	
