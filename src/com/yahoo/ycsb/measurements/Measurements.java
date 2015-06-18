@@ -149,6 +149,7 @@ public class Measurements
     {
       measurement.exportMeasurements(exporter);
     }
+    data.clear();
   }
 	
       /**

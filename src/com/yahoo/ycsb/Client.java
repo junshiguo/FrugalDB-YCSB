@@ -29,107 +29,6 @@ import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 //import org.apache.log4j.BasicConfigurator;
 
 /**
- * A thread to periodically show the status of the experiment, to reassure you that progress is being made.
- * 
- * @author cooperb
- *
- */
-class StatusThread extends Thread
-{
-	Vector<Thread> _threads;
-	String _label;
-	boolean _standardstatus;
-	
-	/**
-	 * The interval for reporting status.
-	 */
-	public static final long sleeptime=10000;
-
-	public StatusThread(Vector<Thread> threads, String label, boolean standardstatus)
-	{
-		_threads=threads;
-		_label=label;
-		_standardstatus=standardstatus;
-	}
-
-	/**
-	 * Run and periodically report status.
-	 */
-	public void run()
-	{
-		long st=System.currentTimeMillis();
-
-		long lasten=st;
-		long lasttotalops=0;
-		
-		boolean alldone;
-
-		do 
-		{
-			alldone=true;
-
-			int totalops=0;
-
-			//terminate this thread when all the worker threads are done
-			for (Thread t : _threads)
-			{
-				if (t.getState()!=Thread.State.TERMINATED)
-				{
-					alldone=false;
-				}
-
-				ClientThread ct=(ClientThread)t;
-				totalops+=ct.getOpsDone();
-			}
-
-			long en=System.currentTimeMillis();
-
-			long interval=en-st;
-			//double throughput=1000.0*((double)totalops)/((double)interval);
-
-			double curthroughput=1000.0*(((double)(totalops-lasttotalops))/((double)(en-lasten)));
-			
-			lasttotalops=totalops;
-			lasten=en;
-			
-			DecimalFormat d = new DecimalFormat("#.##");
-			
-			if (totalops==0)
-			{
-				System.err.println(_label+" "+(interval/1000)+" sec: "+totalops+" operations; "+Measurements.getMeasurements().getSummary());
-			}
-			else
-			{
-				System.err.println(_label+" "+(interval/1000)+" sec: "+totalops+" operations; "+d.format(curthroughput)+" current ops/sec; "+Measurements.getMeasurements().getSummary());
-			}
-
-			if (_standardstatus)
-			{
-			if (totalops==0)
-			{
-				System.out.println(_label+" "+(interval/1000)+" sec: "+totalops+" operations; "+Measurements.getMeasurements().getSummary());
-			}
-			else
-			{
-				System.out.println(_label+" "+(interval/1000)+" sec: "+totalops+" operations; "+d.format(curthroughput)+" current ops/sec; "+Measurements.getMeasurements().getSummary());
-			}
-			}
-
-			try
-			{
-				sleep(sleeptime);
-			}
-			catch (InterruptedException e)
-			{
-				//do nothing
-			}
-
-		}
-		while (!alldone);
-	}
-}
-
-/**
  * Main class for executing YCSB.
  */
 public class Client
@@ -142,6 +41,7 @@ public class Client
 	public static final String WORKLOAD_PROPERTY="workload";
 	
 	public static final String WORKLOAD_FILE_FOR_FRUGALDB = "workloadfile_F";
+	public static final String RESULT_FILE_FRUGALDB = "resultfile_F";
 	
 	public static final String TOTAL_INTERVAL_FRUGALDB = "totalinterval_F";
 	public static final String TOTAL_INTERVAL_FRUGALDB_DEFAULT = "2";
@@ -207,7 +107,7 @@ public class Client
 	 * loaded from conf.
 	 * @throws IOException Either failed to write to output stream or failed to close it.
 	 */
-	private static void exportMeasurements(Properties props, int opcount, long runtime)
+	private static void exportMeasurements(Properties props, int throughput)
 			throws IOException
 	{
 		MeasurementsExporter exporter = null;
@@ -237,9 +137,7 @@ public class Client
 				exporter = new TextMeasurementsExporter(out);
 			}
 
-			exporter.write("OVERALL", "RunTime(ms)", runtime);
-			double throughput = 1000.0 * ((double) opcount) / ((double) runtime);
-			exporter.write("OVERALL", "Throughput(ops/sec)", throughput);
+			exporter.write("OVERALL", "Throughput(ops/minute)", throughput);
 
 			Measurements.getMeasurements().exportMeasurements(exporter);
 		} finally
@@ -573,18 +471,11 @@ public class Client
 		{
 			t.start();
 		}
-		/**
-		 * TODO: add control here, threads[i].checkOpcount();
-		 * read load.txt file
-		 * while (testing){
-		 * 		for each thread:
-		 * 			checkOpcount();
-		 * 		sleep(intervalTime);
-		 * }
-		 */
+		
 		if(dotransactions){
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt")));
+				BufferedWriter resultWriter = new BufferedWriter(new FileWriter(props.getProperty(RESULT_FILE_FRUGALDB, "result.txt")));
 				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
 				int minute_per_interval = Integer.parseInt(props.getProperty(MINUTE_PER_INTERVAL_FRUGALDB, MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
 				//start test signal
@@ -604,11 +495,25 @@ public class Client
 						((ClientThread) threads.get(i)).checkOpcount(Integer.parseInt(load[i]));
 					}
 					for(int minute = 0; minute < minute_per_interval; minute++){
-						//TODO: report throughput (opsdone)
+						Thread.sleep(60*1000);
+						
+						int opsdone = 0;
+						for(Thread t : threads){
+							opsdone += ((ClientThread) t).getOpsDone();
+						}
+						resultWriter.write(""+(interval*minute_per_interval+minute)+" "+opsdone);
+						resultWriter.newLine(); resultWriter.flush();
+						//TODO: this export measurements remain unchecked
+						Client.exportMeasurements(props, opsdone);
+						
+						for(Thread t : threads){
+							((ClientThread) t).checkOpsdone(-1);
+						}
 					}
 				}
 				reader.close();
-			} catch (IOException e) {
+				resultWriter.close();
+			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
 			maxExecutionTime = 3000;
@@ -626,21 +531,21 @@ public class Client
     }
     
     //TODO: opsDone needs to be int[], opdone in ClientThread should be changed accordingly
-    int opsDone = 0;
+//    int opsDone = 0;
+//
+//		for (Thread t : threads)
+//		{
+//			try
+//			{
+//				t.join();
+//				opsDone += ((ClientThread)t).getOpsDone();
+//			}
+//			catch (InterruptedException e)
+//			{
+//			}
+//		}
 
-		for (Thread t : threads)
-		{
-			try
-			{
-				t.join();
-				opsDone += ((ClientThread)t).getOpsDone();
-			}
-			catch (InterruptedException e)
-			{
-			}
-		}
-
-		long en=System.currentTimeMillis();
+//		long en=System.currentTimeMillis();
 		
 		if (terminator != null && !terminator.isInterrupted()) {
       terminator.interrupt();
@@ -661,16 +566,17 @@ public class Client
 			e.printStackTrace(System.out);
 			System.exit(0);
 		}
-
-		try
-		{
-			exportMeasurements(props, opsDone, en - st);
-		} catch (IOException e)
-		{
-			System.err.println("Could not export measurements, error: " + e.getMessage());
-			e.printStackTrace();
-			System.exit(-1);
-		}
+		
+		//measurements is done by each minute
+//		try
+//		{
+//			exportMeasurements(props, opsDone, en - st);
+//		} catch (IOException e)
+//		{
+//			System.err.println("Could not export measurements, error: " + e.getMessage());
+//			e.printStackTrace();
+//			System.exit(-1);
+//		}
 
 		System.exit(0);
 	}

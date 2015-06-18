@@ -71,7 +71,6 @@ class ClientThread extends Thread
 		}
 		return _opsdone;
 	}
-	//TODO:newly added, need to use
 	/**
 	 * if load is less than 0, the _opcount will be returned; _opcount is set to load otherwise.
 	 * @param load per minute
@@ -79,7 +78,7 @@ class ClientThread extends Thread
 	 */
 	public synchronized int checkOpcount(int load){
 		if(load >= 0){
-			this._opcount = load * Integer.parseInt(_props.getProperty(Client.MINUTE_PER_INTERVAL_FRUGALDB, Client.MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
+			this._opcount = load;
 			this._target = this._opcount * 1.0 / 60000;
 		}
 		return _opcount;
@@ -148,7 +147,7 @@ class ClientThread extends Thread
 						while(this.checkOpsdone(0) == this.checkOpcount(-1)){
 							try
 							{
-								sleep(10*1000);
+								sleep(1*1000);
 							}
 							catch (InterruptedException e)
 							{
@@ -202,7 +201,6 @@ class ClientThread extends Thread
 			else
 			{
 				long st=System.currentTimeMillis();
-				//TODO: during load phase, _opcount will not be set by load.txt; need to be done in Client
 				while (((_opcount == 0) || (_opsdone < _opcount)) && !_workload.isStopRequested())
 				{
 
