@@ -79,7 +79,7 @@ class ClientThread extends Thread
 	public synchronized int checkOpcount(int load){
 		if(load >= 0){
 			this._opcount = load;
-			this._target = this._opcount * 1.0 / 60000;
+			this._target = this._opcount * 1.0 / 55000;
 		}
 		return _opcount;
 	}

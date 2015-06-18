@@ -2,8 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="/Users/guojunshi/Documents/Projects/Java/FrugalDB-YCSB/lib/jackson-all-1.9.0.jar"/>
-	<classpathentry kind="lib" path="/Users/guojunshi/Documents/Projects/Java/FrugalDB-YCSB/lib/voltdb-4.4.1.jar"/>
-	<classpathentry kind="lib" path="/Users/guojunshi/Documents/Projects/Java/FrugalDB-YCSB/lib/voltdbclient-4.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-all-1.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/voltdb-4.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/voltdbclient-4.4.1.jar"/>
+	<classpathentry kind="lib" path="/home/guojunshi/Projects/GitHub/hybrid/lib/mysql-connector-java-5.0.8-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

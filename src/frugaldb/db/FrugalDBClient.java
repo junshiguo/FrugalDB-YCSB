@@ -2,6 +2,7 @@ package frugaldb.db;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -40,6 +41,8 @@ public class FrugalDBClient extends DB {
 
 	private Connection mysqlConn;
 	private Statement mysqlStmt;
+	private PreparedStatement preparedInsert;
+	private PreparedStatement preparedUpdate;
 	private Client voltdbConn;
 	
 	//check connection can be called before each operation on db
@@ -47,7 +50,7 @@ public class FrugalDBClient extends DB {
 		if(mysqlConn == null || mysqlConn.isClosed()){
 			mysqlConn = DBManager.connectDB(DBConfig.url, DBConfig.username, DBConfig.password);
 			mysqlStmt = mysqlConn.createStatement();
-		}else if(mysqlStmt == null || mysqlStmt.isClosed()){
+		}else if(mysqlStmt == null){
 			mysqlStmt = mysqlConn.createStatement();
 		}
 	}
@@ -89,9 +92,21 @@ public class FrugalDBClient extends DB {
 	public void cleanup() throws DBException
 	{
 		try {
-			mysqlStmt.close();
-			mysqlConn.close();
-			voltdbConn.close();
+			if(mysqlStmt != null){
+				mysqlStmt.close();
+			}
+			if(preparedInsert != null){
+				preparedInsert.close();
+			}
+			if(preparedUpdate != null){
+				preparedUpdate.close();
+			}
+			if(mysqlConn != null){
+				mysqlConn.close();
+			}
+			if(voltdbConn != null){
+				voltdbConn.close();
+			}
 		} catch (SQLException | InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -120,7 +135,7 @@ public class FrugalDBClient extends DB {
 			}
 			if(checkInVoltdb(false, false) == false){
 				checkMysqlConnection();
-				sql += " FROM "+table+idInMysql+" WHERE key = "+key;
+				sql += " FROM "+table+idInMysql+" WHERE ycsb_key = '"+key+"'";
 				ResultSet rs = mysqlStmt.executeQuery(sql);
 //				while(rs.next()){
 //					ResultSetMetaData rsmd = rs.getMetaData();
@@ -130,7 +145,7 @@ public class FrugalDBClient extends DB {
 //				}
 			}else{
 				checkVoltdbConnection();
-				sql += " FROM "+table+idInVoltdb+" WHERE key = "+key+" AND tenantId = "+idInMysql;
+				sql += " FROM "+table+idInVoltdb+" WHERE ycsb_key = '"+key+"' AND tenantId = "+idInMysql;
 				ClientResponse response;
 				if(fields == null){
 					response = voltdbConn.callProcedure(table.toUpperCase()+idInVoltdb+".select", key, idInMysql);
@@ -238,19 +253,25 @@ public class FrugalDBClient extends DB {
 				checkMysqlConnection();
 				String sql = "UPDATE "+table+idInMysql+" SET ";
 				for (String k : values.keySet()){
-					sql += "k = '"+values.get(k).toString()+"',";
+					sql += k + " = ?,";
 				}
 				sql = sql.substring(0, sql.length()-1);
-				sql += " WHERE key = '"+key+"'";
-				mysqlStmt.execute(sql);
+				sql += " WHERE ycsb_key = '"+key+"'";
+				preparedUpdate = mysqlConn.prepareStatement(sql);
+				int index = 1;
+				for(String k : values.keySet()){
+					preparedUpdate.setString(index, values.get(k).toString());
+					index++;
+				}
+				preparedUpdate.execute();
 			}else{
 				checkVoltdbConnection();
 				String sql = "UPDATE "+table+idInVoltdb+" SET ";
 				for (String k : values.keySet()){
-					sql += "k = '"+values.get(k).toString()+"',";
+					sql += k+ " = '"+values.get(k).toString()+"',";
 				}
 				sql = sql.substring(0, sql.length()-1);
-				sql += " WHERE key = '"+key+"' AND tenantId = "+idInMysql;
+				sql += " WHERE ycsb_key = '"+key+"' AND tenantId = "+idInMysql;
 				voltdbConn.callProcedure("@AdHoc", sql);
 			}
 		} catch (SQLException | IOException | ProcCallException e) {
@@ -274,13 +295,25 @@ public class FrugalDBClient extends DB {
 		try {
 			if (checkInVoltdb(false, false) == false) {
 				checkMysqlConnection();
-				String sql = "INSERT INTO "+table+idInMysql+" VALUES ('"+key+"'";
+//				if(preparedInsert == null){
+					String sql = "INSERT INTO "+table+idInMysql+" (ycsb_key";
+					for(String k : values.keySet()){
+						sql += ","+k;
+					}
+					sql += ") VALUES ('"+key+"'";
+					for(int i = 0; i < values.size(); i++){
+						sql += ",?";
+					}
+					sql += ")";
+					preparedInsert = mysqlConn.prepareStatement(sql);
+//				}
+				int index = 1;
 				for (String k : values.keySet())
 				{
-					sql += ",'"+values.get(k).toString()+"'";
+					preparedInsert.setString(index, values.get(k).toString());
+					index++;
 				}
-				sql += ");";
-				mysqlStmt.execute(sql);
+				preparedInsert.executeUpdate();
 			} else {
 				checkVoltdbConnection();
 				Object[] v =  values.values().toArray();
@@ -309,7 +342,7 @@ public class FrugalDBClient extends DB {
 		try {
 			if(checkInVoltdb(false, false) == false){
 				checkMysqlConnection();
-				String sql = "DELETE FROM"+table+idInMysql+" WHERE key = '"+key+"'";
+				String sql = "DELETE FROM "+table+idInMysql+" WHERE ycsb_key = '"+key+"'";
 				mysqlStmt.execute(sql);
 			}else{
 				checkVoltdbConnection();

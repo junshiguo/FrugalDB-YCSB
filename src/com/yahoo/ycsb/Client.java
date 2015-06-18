@@ -44,10 +44,10 @@ public class Client
 	public static final String RESULT_FILE_FRUGALDB = "resultfile_F";
 	
 	public static final String TOTAL_INTERVAL_FRUGALDB = "totalinterval_F";
-	public static final String TOTAL_INTERVAL_FRUGALDB_DEFAULT = "2";
+	public static final String TOTAL_INTERVAL_FRUGALDB_DEFAULT = "1";
 	
 	public static final String MINUTE_PER_INTERVAL_FRUGALDB = "minuteperinterval_F";
-	public static final String MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT = "5";
+	public static final String MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT = "1";
 	
 	/**
 	 * Indicates how many inserts to do, if less than recordcount. Useful for partitioning
@@ -516,9 +516,9 @@ public class Client
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
-			maxExecutionTime = 3000;
+			maxExecutionTime = 3;
 		}else{
-			//do nothing
+			Client.checkStart(true);
 		}
 		
 		
@@ -546,6 +546,13 @@ public class Client
 //		}
 
 //		long en=System.currentTimeMillis();
+    for(Thread t : threads){
+    	try {
+			t.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    }
 		
 		if (terminator != null && !terminator.isInterrupted()) {
       terminator.interrupt();
