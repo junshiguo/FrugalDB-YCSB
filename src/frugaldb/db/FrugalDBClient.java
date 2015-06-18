@@ -118,7 +118,7 @@ public class FrugalDBClient extends DB {
 				}
 				sql = sql.substring(0, sql.length()-1);
 			}
-			if(checkInVoltdb(false, false)){
+			if(checkInVoltdb(false, false) == false){
 				checkMysqlConnection();
 				sql += " FROM "+table+idInMysql+" WHERE key = "+key;
 				ResultSet rs = mysqlStmt.executeQuery(sql);
@@ -234,7 +234,7 @@ public class FrugalDBClient extends DB {
 	public int update(String table, String key,
 			HashMap<String, ByteIterator> values) {
 		try {
-			if(checkInVoltdb(false, false)){
+			if(checkInVoltdb(false, false) == false){
 				checkMysqlConnection();
 				String sql = "UPDATE "+table+idInMysql+" SET ";
 				for (String k : values.keySet()){
@@ -307,7 +307,7 @@ public class FrugalDBClient extends DB {
 	 */
 	public int delete(String table, String key) {
 		try {
-			if(checkInVoltdb(false, false)){
+			if(checkInVoltdb(false, false) == false){
 				checkMysqlConnection();
 				String sql = "DELETE FROM"+table+idInMysql+" WHERE key = '"+key+"'";
 				mysqlStmt.execute(sql);
