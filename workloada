@@ -29,8 +29,8 @@ workload=frugaldb.workload.FrugalDBWorkload
 
 readallfields=true
 
-readproportion=0.5
-updateproportion=0.5
+readproportion=0.2
+updateproportion=0.8
 scanproportion=0
 insertproportion=0
 

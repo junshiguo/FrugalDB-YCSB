@@ -40,7 +40,7 @@ db.driver=com.mysql.jdbc.Driver
 db.url=jdbc:mysql://127.0.0.1/ycsb
 db.user=remote
 db.passwd=remote
-voltdbServer=127.0.0.1
+voltdbserver=127.0.0.1
 
 mmeasurementtype=timeseries
 
