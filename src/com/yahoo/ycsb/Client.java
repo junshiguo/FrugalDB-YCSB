@@ -483,6 +483,7 @@ public class Client
 					((ClientThread)t).checkOpcount(-1);
 				}
 				Client.checkStart(true);
+				//TODO: load.txt file format
 				for(int interval = 0; interval < total_interval; interval++){
 					String line = reader.readLine();
 					if(line == null){
