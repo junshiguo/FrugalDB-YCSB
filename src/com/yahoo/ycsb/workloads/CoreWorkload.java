@@ -18,6 +18,7 @@
 package com.yahoo.ycsb.workloads;
 
 import java.util.Properties;
+
 import com.yahoo.ycsb.*;
 import com.yahoo.ycsb.generator.CounterGenerator;
 import com.yahoo.ycsb.generator.DiscreteGenerator;
@@ -32,6 +33,8 @@ import com.yahoo.ycsb.generator.SkewedLatestGenerator;
 import com.yahoo.ycsb.generator.UniformIntegerGenerator;
 import com.yahoo.ycsb.generator.ZipfianGenerator;
 import com.yahoo.ycsb.measurements.Measurements;
+
+import frugaldb.workload.FMeasurement;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -62,7 +65,8 @@ import java.util.Vector;
  */
 public class CoreWorkload extends Workload
 {
-
+//	public FMeasurement measure = new FMeasurement();
+	
 	/**
 	 * The name of the database table to run queries against.
 	 */
@@ -297,6 +301,15 @@ public class CoreWorkload extends Workload
 		return fieldlengthgenerator;
 	}
 	
+	
+	@Override
+	public Object initThread(Properties p, int mythreadid, int threadcount)
+			throws WorkloadException {
+		measure = new FMeasurement();
+		return super.initThread(p, mythreadid, threadcount);
+	}
+
+
 	/**
 	 * Initialize the scenario. 
 	 * Called once, in the main client thread, before any operations are started.
@@ -534,7 +547,10 @@ public class CoreWorkload extends Workload
 			fields.add(fieldname);
 		}
 
+		long start = System.currentTimeMillis();
 		db.read(table,keyname,fields,new HashMap<String,ByteIterator>());
+		long end = System.currentTimeMillis();
+		measure.measurement(end - start);
 	}
 	
 	public void doTransactionReadModifyWrite(DB db)
@@ -578,7 +594,8 @@ public class CoreWorkload extends Workload
 
 		long en=System.currentTimeMillis();
 		
-		Measurements.getMeasurements().measure("READ-MODIFY-WRITE", (int)(en-st));
+//		Measurements.getMeasurements().measure("READ-MODIFY-WRITE", (int)(en-st));
+		measure.measurement(en - st);
 	}
 	
 	public void doTransactionScan(DB db)
@@ -602,7 +619,10 @@ public class CoreWorkload extends Workload
 			fields.add(fieldname);
 		}
 
+		long start = System.currentTimeMillis();
 		db.scan(table,startkeyname,len,fields,new Vector<HashMap<String,ByteIterator>>());
+		long end = System.currentTimeMillis();
+		measure.measurement(end - start);
 	}
 
 	public void doTransactionUpdate(DB db)
@@ -625,7 +645,10 @@ public class CoreWorkload extends Workload
 		   values = buildUpdate();
 		}
 
+		long start = System.currentTimeMillis();
 		db.update(table,keyname,values);
+		long end = System.currentTimeMillis();
+		measure.measurement(end - start);
 	}
 
 	public void doTransactionInsert(DB db)
@@ -636,6 +659,9 @@ public class CoreWorkload extends Workload
 		String dbkey = buildKeyName(keynum);
 
 		HashMap<String, ByteIterator> values = buildValues();
+		long start = System.currentTimeMillis();
 		db.insert(table,dbkey,values);
+		long end = System.currentTimeMillis();
+		measure.measurement(end - start);
 	}
 }

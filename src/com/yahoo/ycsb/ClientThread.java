@@ -2,6 +2,8 @@ package com.yahoo.ycsb;
 
 import java.util.Properties;
 
+import com.yahoo.ycsb.workloads.CoreWorkload;
+
 
 /**
  * A thread for executing transactions or data inserts to the database.
@@ -25,7 +27,6 @@ class ClientThread extends Thread
 	int _threadcount;
 	Object _workloadstate;
 	Properties _props;
-
 
 	/**
 	 * Constructor.
@@ -154,7 +155,7 @@ class ClientThread extends Thread
 							  // do nothing.
 							}
 						}
-						this.checkOpsdone(-1);
+//						this.checkOpsdone(-1);
 						st=System.currentTimeMillis();
 					}
 

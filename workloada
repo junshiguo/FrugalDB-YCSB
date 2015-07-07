@@ -45,8 +45,8 @@ voltdbserver=127.0.0.1
 mmeasurementtype=timeseries
 
 exportfile=measure.txt
-#workloadfile_F=load.txt
-#resultfile_F=result.txt
+workloadfile_F=load.txt
+resultfile_F=result
 totalinterval_F=2
 minuteperinterval_F=1
 #histogram.buckets=1000

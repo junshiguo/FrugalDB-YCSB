@@ -26,6 +26,8 @@ import com.yahoo.ycsb.measurements.Measurements;
 import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
 import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 
+import frugaldb.workload.FMeasurement;
+
 //import org.apache.log4j.BasicConfigurator;
 
 /**
@@ -433,6 +435,14 @@ public class Client
 
 		Vector<Thread> threads=new Vector<Thread>();
 
+		@SuppressWarnings("rawtypes")
+		Class workloadclass = null;
+		try {
+			workloadclass = classLoader.loadClass(props.getProperty(WORKLOAD_PROPERTY));
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+			System.exit(0);
+		}
 		for (int threadid=0; threadid<threadcount; threadid++)
 		{
 			DB db=null;
@@ -443,6 +453,16 @@ public class Client
 			catch (UnknownDBException e)
 			{
 				System.out.println("Unknown DB "+dbname);
+				System.exit(0);
+			}
+
+			//TODO: workload need to be different for each tenant
+			try {
+				workload=(Workload)workloadclass.newInstance();
+				
+				workload.init(props);
+			} catch (InstantiationException | IllegalAccessException | WorkloadException e) {
+				e.printStackTrace();
 				System.exit(0);
 			}
 
@@ -475,7 +495,6 @@ public class Client
 		if(dotransactions){
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt")));
-				BufferedWriter resultWriter = new BufferedWriter(new FileWriter(props.getProperty(RESULT_FILE_FRUGALDB, "result.txt")));
 				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
 				int minute_per_interval = Integer.parseInt(props.getProperty(MINUTE_PER_INTERVAL_FRUGALDB, MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
 				//start test signal
@@ -483,37 +502,37 @@ public class Client
 					((ClientThread)t).checkOpcount(-1);
 				}
 				Client.checkStart(true);
-				//TODO: load.txt file format
+				
+				for(int i = 0; i < 11; i++){
+					reader.readLine();
+				}
 				for(int interval = 0; interval < total_interval; interval++){
-					String line = reader.readLine();
-					if(line == null){
-						System.out.println("Fail to read from load file! Stopping...");
-						reader.close();
-						return;
-					}
-					String[] load = line.split("\\s+");
-					for(int i = 0; i < threads.size(); i++){
-						((ClientThread) threads.get(i)).checkOpcount(Integer.parseInt(load[i]));
-					}
 					for(int minute = 0; minute < minute_per_interval; minute++){
+						//update opcount to workload, update opdone to 0
+						String line = reader.readLine();
+						if(line == null){
+							System.out.println("Fail to read from load file! Stopping...");
+							reader.close();
+							return;
+						}
+						String[] load = line.split("\\s+");
+						for(int i = 0; i < threads.size(); i++){
+							((ClientThread) threads.get(i)).checkOpcount(Integer.parseInt(load[i+1]));
+							((ClientThread) threads.get(i)).checkOpsdone(-1);
+						}
+						//sleep while client threads do transactions 
 						Thread.sleep(60*1000);
-						
-						int opsdone = 0;
+						//summary measurements and write to file
+						int vq = 0, vt = 0;
 						for(Thread t : threads){
-							opsdone += ((ClientThread) t).getOpsDone();
+							((ClientThread) t)._workload.measure.measurement(((ClientThread) t).checkOpcount(-1), ((ClientThread) t).getOpsDone());
 						}
-						resultWriter.write(""+(interval*minute_per_interval+minute)+" "+opsdone);
-						resultWriter.newLine(); resultWriter.flush();
 						//TODO: this export measurements remain unchecked
-						Client.exportMeasurements(props, opsdone);
-						
-						for(Thread t : threads){
-							((ClientThread) t).checkOpsdone(-1);
-						}
+//						Client.exportMeasurements(props, opsdone);
 					}
 				}
 				reader.close();
-				resultWriter.close();
+				FMeasurement.exportMeasure(props.getProperty(RESULT_FILE_FRUGALDB, "."));
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -531,22 +550,6 @@ public class Client
       terminator.start();
     }
     
-    //TODO: opsDone needs to be int[], opdone in ClientThread should be changed accordingly
-//    int opsDone = 0;
-//
-//		for (Thread t : threads)
-//		{
-//			try
-//			{
-//				t.join();
-//				opsDone += ((ClientThread)t).getOpsDone();
-//			}
-//			catch (InterruptedException e)
-//			{
-//			}
-//		}
-
-//		long en=System.currentTimeMillis();
     for(Thread t : threads){
     	try {
 			t.join();

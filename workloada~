@@ -29,8 +29,8 @@ workload=frugaldb.workload.FrugalDBWorkload
 
 readallfields=true
 
-readproportion=0.5
-updateproportion=0.5
+readproportion=0.2
+updateproportion=0.8
 scanproportion=0
 insertproportion=0
 
@@ -45,8 +45,8 @@ voltdbserver=127.0.0.1
 mmeasurementtype=timeseries
 
 exportfile=measure.txt
-#workloadfile_F=load.txt
-#resultfile_F=result.txt
+workloadfile_F=load.txt
+resultfile_F=result
 totalinterval_F=2
 minuteperinterval_F=1
 #histogram.buckets=1000

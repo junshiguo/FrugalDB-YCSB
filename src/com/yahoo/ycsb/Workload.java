@@ -20,6 +20,8 @@ package com.yahoo.ycsb;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import frugaldb.workload.FMeasurement;
+
 /**
  * One experiment scenario. One object of this type will
  * be instantiated and shared among all client threads. This class
@@ -39,6 +41,8 @@ public abstract class Workload
 	public static final String INSERT_START_PROPERTY="insertstart";
 	
 	public static final String INSERT_START_PROPERTY_DEFAULT="0";
+
+	public FMeasurement measure;
 	
 	private volatile AtomicBoolean stopRequested = new AtomicBoolean(false);
 	
