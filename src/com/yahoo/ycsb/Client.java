@@ -502,6 +502,7 @@ public class Client
 					((ClientThread)t).checkOpcount(-1);
 				}
 				Client.checkStart(true);
+				System.out.println("Starting FrugalDB test.");
 				
 				for(int i = 0; i < 11; i++){
 					reader.readLine();
@@ -526,7 +527,13 @@ public class Client
 						int vq = 0, vt = 0;
 						for(Thread t : threads){
 							((ClientThread) t)._workload.measure.measurement(((ClientThread) t).checkOpcount(-1), ((ClientThread) t).getOpsDone());
+							int tmp = ((ClientThread) t).checkOpcount(-1) - ((ClientThread) t).getOpsDone();
+							if(tmp > 0){
+								vq += tmp;
+								vt ++;
+							}
 						}
+						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
 						//TODO: this export measurements remain unchecked
 //						Client.exportMeasurements(props, opsdone);
 					}

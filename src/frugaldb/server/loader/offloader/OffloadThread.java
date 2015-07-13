@@ -1,10 +1,13 @@
 package frugaldb.server.loader.offloader;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.ArrayList;
 
 import org.voltdb.client.Client;
 
+import frugaldb.server.FServer;
+import frugaldb.server.loader.VMMatch;
 import frugaldb.server.loader.utility.DBManager;
 
 public class OffloadThread extends Thread {
@@ -28,8 +31,14 @@ public class OffloadThread extends Thread {
 		while((next = OffloadThread.nextToLoad()) != -1){
 			conn = DBManager.checkMysqlConn(conn);
 			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);
-			Mysql2Voltdb m = new Mysql2Voltdb(conn, voltdbConn, next);
+			int vid = VMMatch.findVolumn();
+			Mysql2Voltdb m = new Mysql2Voltdb(conn, voltdbConn, next, vid);
 			m.run();
+			try {
+				FServer.socketSend.send(true, next, vid);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

@@ -1,4 +1,4 @@
-package frugaldb.server.loader.retriver;
+package frugaldb.server.loader.retriever;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -16,7 +16,7 @@ import org.voltdb.client.ProcCallException;
 
 import frugaldb.server.loader.utility.DBManager;
 
-public class StockRetriver extends Thread {
+public class StockRetriever extends Thread {
 	public String url, username, password;
 	public String voltdbServer;
 	public int tenantId;
@@ -27,7 +27,7 @@ public class StockRetriver extends Thread {
 	Client voltdbConn = null;
 	PreparedStatement[] statements;
 	
-	public StockRetriver(String url, String username, String password, String voltdbServer, int tenantId, int volumnId){
+	public StockRetriever(String url, String username, String password, String voltdbServer, int tenantId, int volumnId){
 		this.url = url;
 		this.username = username;
 		this.password = password;

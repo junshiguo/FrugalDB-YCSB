@@ -18,20 +18,22 @@ public class Mysql2Voltdb {
 	public Connection conn;
 	public Client voltdbConn;
 	public int tenantId;
+	public int volumnId;
 	
 //	public static void main(String[] args){
 //		new Mysql2Voltdb("jdbc:mysql://127.0.0.1/test", "remote", "remote", "127.0.0.1", 0).start();
 //	}
 
 	public Mysql2Voltdb(){}
-	public Mysql2Voltdb(Connection conn, Client voltdbConn, int tenantId){
+	public Mysql2Voltdb(Connection conn, Client voltdbConn, int tenantId, int volumnId){
 		this.conn = conn;
 		this.voltdbConn = voltdbConn;
 		this.tenantId = tenantId;
+		this.volumnId = volumnId;
 	}
 	
 	public void run(){
-		int emptyVolumn = VMMatch.findVolumn();
+		int emptyVolumn = volumnId;
 		if(emptyVolumn != -1){
 //			conn = DBManager.checkMysqlConn(conn);
 //			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);

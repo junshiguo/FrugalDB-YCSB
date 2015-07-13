@@ -9,19 +9,16 @@ public class FOffloader extends Offloader {
 
 	public FOffloader(ArrayList<AbstractTenant> tenants) {
 		super(tenants);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public int getWorkloadLimitInMysql() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 30000;
 	}
 
 	@Override
 	public int getTotSpaceInVoltdb() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 2000;
 	}
 
 	@Override

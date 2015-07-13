@@ -32,11 +32,13 @@ public class FrugalDBClient extends DB {
 	 * _inVoltdb is set according to data transfered from server, after the data is offloaded or retrieved
 	 */
 	public boolean _inVoltdb = false;
-	public synchronized boolean checkInVoltdb(boolean isSet, boolean value){
-		if(isSet){
-			_inVoltdb = value;
-		}
+	public boolean isInVoltdb(){
 		return _inVoltdb;
+	}
+	public void setInVoltdb(int id){
+		idInVoltdb = id;
+		if(idInVoltdb == -1)	_inVoltdb = false;
+		else _inVoltdb = true;
 	}
 
 	private Connection mysqlConn;
@@ -74,7 +76,7 @@ public class FrugalDBClient extends DB {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if(checkInVoltdb(false, false)){
+		if(isInVoltdb()){
 			checkVoltdbConnection();
 		}
 	}
@@ -127,7 +129,7 @@ public class FrugalDBClient extends DB {
 				}
 				sql = sql.substring(0, sql.length()-1);
 			}
-			if(checkInVoltdb(false, false) == false){
+			if(isInVoltdb() == false){
 				checkMysqlConnection();
 				sql += " FROM "+table+idInMysql+" WHERE ycsb_key = '"+key+"'";
 				ResultSet rs = mysqlStmt.executeQuery(sql);
@@ -243,7 +245,7 @@ public class FrugalDBClient extends DB {
 	public int update(String table, String key,
 			HashMap<String, ByteIterator> values) {
 		try {
-			if(checkInVoltdb(false, false) == false){
+			if(isInVoltdb() == false){
 				checkMysqlConnection();
 				String sql = "UPDATE "+table+idInMysql+" SET ";
 				for (String k : values.keySet()){
@@ -287,7 +289,7 @@ public class FrugalDBClient extends DB {
 	public int insert(String table, String key,
 			HashMap<String, ByteIterator> values) {
 		try {
-			if (checkInVoltdb(false, false) == false) {
+			if (isInVoltdb() == false) {
 				checkMysqlConnection();
 //				if(preparedInsert == null){
 					String sql = "INSERT INTO "+table+idInMysql+" (ycsb_key";
@@ -334,7 +336,7 @@ public class FrugalDBClient extends DB {
 	 */
 	public int delete(String table, String key) {
 		try {
-			if(checkInVoltdb(false, false) == false){
+			if(isInVoltdb() == false){
 				checkMysqlConnection();
 				String sql = "DELETE FROM "+table+idInMysql+" WHERE ycsb_key = '"+key+"'";
 				mysqlStmt.execute(sql);

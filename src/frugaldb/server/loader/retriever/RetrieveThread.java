@@ -1,11 +1,13 @@
-package frugaldb.server.loader.retriver;
+package frugaldb.server.loader.retriever;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import frugaldb.server.FServer;
 import frugaldb.server.loader.VMMatch;
 
-public class RetriveThread extends Thread {
+public class RetrieveThread extends Thread {
 	public static List<Integer> toRetrive = new ArrayList<Integer>();
 	public static void setToRetrive(ArrayList<Integer> to){
 		toRetrive = new ArrayList<Integer>(to);
@@ -21,9 +23,15 @@ public class RetriveThread extends Thread {
 	
 	public void run(){
 		int next;
-		while((next = RetriveThread.nextToRetrive()) != -1){
-			Voltdb2Mysql m = new Voltdb2Mysql(next, VMMatch.findTenant(next));
+		while((next = RetrieveThread.nextToRetrive()) != -1){
+			int vid = VMMatch.findTenant(next);
+			Voltdb2Mysql m = new Voltdb2Mysql(next, vid);
 			m.run();
+			try {
+				FServer.socketSend.send(false, next, vid);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

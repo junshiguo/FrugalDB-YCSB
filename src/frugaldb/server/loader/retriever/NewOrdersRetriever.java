@@ -1,4 +1,4 @@
-package frugaldb.server.loader.retriver;
+package frugaldb.server.loader.retriever;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,7 +15,7 @@ import org.voltdb.client.ProcCallException;
 
 import frugaldb.server.loader.utility.DBManager;
 
-public class NewOrdersRetriver extends Thread {
+public class NewOrdersRetriever extends Thread {
 	public String url, username, password;
 	public String voltdbServer;
 	public int tenantId;
@@ -26,7 +26,7 @@ public class NewOrdersRetriver extends Thread {
 	Client voltdbConn = null;
 	PreparedStatement[] statements;
 	
-	public NewOrdersRetriver(String url, String username, String password, String voltdbServer, int tenantId, int volumnId){
+	public NewOrdersRetriever(String url, String username, String password, String voltdbServer, int tenantId, int volumnId){
 		this.url = url;
 		this.username = username;
 		this.password = password;

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.voltdb.client.ProcCallException;
 
 import frugaldb.server.loader.offloader.OffloadThread;
-import frugaldb.server.loader.retriver.RetriveThread;
+import frugaldb.server.loader.retriever.RetrieveThread;
 
 public class LoaderMain extends Thread {
 	
@@ -72,10 +72,10 @@ public class LoaderMain extends Thread {
 	 */
 	public static void retrive(ArrayList<Integer> toRetrive){
 		init();
-		RetriveThread.setToRetrive(toRetrive);
-		RetriveThread[] retrivers = new RetriveThread[LoadConfig.V2MConcurrency];
+		RetrieveThread.setToRetrive(toRetrive);
+		RetrieveThread[] retrivers = new RetrieveThread[LoadConfig.V2MConcurrency];
 		for(int i = 0; i < LoadConfig.V2MConcurrency; i++){
-			retrivers[i] = new RetriveThread();
+			retrivers[i] = new RetrieveThread();
 			retrivers[i].start();
 		}
 		for(int i = 0; i < LoadConfig.V2MConcurrency; i++){
