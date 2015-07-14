@@ -28,7 +28,7 @@ public class RetrieveThread extends Thread {
 			Voltdb2Mysql m = new Voltdb2Mysql(next, vid);
 			m.run();
 			try {
-				FServer.socketSend.send(false, next, vid);
+				FServer.socketSend.sendV2M(next);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

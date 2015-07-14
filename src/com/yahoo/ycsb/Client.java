@@ -158,6 +158,10 @@ public class Client
 		}
 		return START_TEST;
 	}
+	public static Vector<Thread> threads=new Vector<Thread>();
+	public static void setVoltdb(int mid, int vid){
+		((ClientThread)threads.get(mid)).setVoltdb(vid);
+	}
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args)
 	{
@@ -433,7 +437,6 @@ public class Client
 			}
 		}
 
-		Vector<Thread> threads=new Vector<Thread>();
 
 		@SuppressWarnings("rawtypes")
 		Class workloadclass = null;

@@ -35,7 +35,7 @@ public class OffloadThread extends Thread {
 			Mysql2Voltdb m = new Mysql2Voltdb(conn, voltdbConn, next, vid);
 			m.run();
 			try {
-				FServer.socketSend.send(true, next, vid);
+				FServer.socketSend.sendM2V(next, vid);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

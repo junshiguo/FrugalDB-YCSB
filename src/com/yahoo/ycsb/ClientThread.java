@@ -4,6 +4,8 @@ import java.util.Properties;
 
 import com.yahoo.ycsb.workloads.CoreWorkload;
 
+import frugaldb.db.FrugalDBClient;
+
 
 /**
  * A thread for executing transactions or data inserts to the database.
@@ -27,6 +29,10 @@ class ClientThread extends Thread
 	int _threadcount;
 	Object _workloadstate;
 	Properties _props;
+	
+	public void setVoltdb(int id){
+		((FrugalDBClient) _db).setInVoltdb(id);
+	}
 
 	/**
 	 * Constructor.
@@ -112,7 +118,7 @@ class ClientThread extends Thread
 		//wait until all threads are initialized, start operations together
 		while(Client.checkStart(false) == false){
 			try {
-				sleep(1000);
+				sleep(3000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

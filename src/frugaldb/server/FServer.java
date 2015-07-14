@@ -15,8 +15,8 @@ import newhybrid.util.OffloadTenant;
 
 public class FServer {
 	public static int SocketPort = 8899;
-	public static FSocketReceive socketReceive;
-	public static FSocketSend socketSend;
+	public static FSocketTask socketReceive;
+	public static FSocketTask socketSend;
 	public static int IntervalId = 0;
 	public static int getIntervalId() {
 		return IntervalId;
@@ -89,7 +89,7 @@ public class FServer {
 				doOffload(decision.getOffloaderTenants());
 			}else{
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(10000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -140,10 +140,10 @@ public class FServer {
 		OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream(),"UTF-8");
 		String line = reader.readLine();
 		if(line.trim().equalsIgnoreCase("client to server")){
-			socketReceive = new FSocketReceive(socket, reader);
+			socketReceive = new FSocketTask(socket, reader, writer);
 			socketReceive.start();
 		}else{
-			socketSend = new FSocketSend(socket, writer);
+			socketSend = new FSocketTask(socket, reader, writer);
 		}
 		return serverSocket;
 	}
