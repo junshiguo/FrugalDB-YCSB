@@ -26,6 +26,7 @@ import com.yahoo.ycsb.measurements.Measurements;
 import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
 import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 
+import frugaldb.db.FrugalDBClient;
 import frugaldb.utility.IdMatch;
 import frugaldb.workload.FMeasurement;
 
@@ -453,16 +454,8 @@ public class Client
 		}
 		for (int threadid=0; threadid<threadcount; threadid++)
 		{
-			DB db=null;
-			try
-			{
-				db=DBFactory.newDB(dbname,props);
-			}
-			catch (UnknownDBException e)
-			{
-				System.out.println("Unknown DB "+dbname);
-				System.exit(0);
-			}
+			DB db=new FrugalDBClient();
+			db.setProperties(props);
 
 			try {
 				workload=(Workload)workloadclass.newInstance();
@@ -476,7 +469,7 @@ public class Client
 			Thread t=new ClientThread(db,dotransactions,workload,threadid,threadcount,props,opcount/threadcount,targetperthreadperms);
 
 			threads.add(t);
-			//t.start();
+			t.start();
 		}
 
 //		StatusThread statusthread=null;
@@ -494,10 +487,10 @@ public class Client
 
 		long st=System.currentTimeMillis();
 
-		for (Thread t : threads)
-		{
-			t.start();
-		}
+//		for (Thread t : threads)
+//		{
+//			t.start();
+//		}
 		
 		if(dotransactions){
 			try {

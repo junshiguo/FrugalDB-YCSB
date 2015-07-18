@@ -73,6 +73,7 @@ public class FrugalDBClient extends DB {
 		this.idInMysql = id;
 		try {
 			checkMysqlConnection();
+//			System.out.println(id+" "+this.getProperties().getProperty("db.url", "jdbc:mysql://127.0.0.1/ycsb"));
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

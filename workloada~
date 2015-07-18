@@ -37,18 +37,18 @@ insertproportion=0
 requestdistribution=zipfian
 
 db.driver=com.mysql.jdbc.Driver
-db.url=jdbc:mysql://127.0.0.1/ycsb
+db.url=jdbc:mysql://10.20.2.28/ycsb
 db.user=remote
 db.passwd=remote
-voltdbserver=127.0.0.1
+voltdbserver=10.20.2.28
 
 mmeasurementtype=timeseries
 
 exportfile=measure.txt
 workloadfile_F=load.txt
 resultfile_F=result
-totalinterval_F=2
-minuteperinterval_F=1
+totalinterval_F=8
+minuteperinterval_F=5
 #histogram.buckets=1000
 #timeseries.granularity=1000
 
