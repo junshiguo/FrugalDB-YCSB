@@ -26,6 +26,7 @@ import com.yahoo.ycsb.measurements.Measurements;
 import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
 import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 
+import frugaldb.utility.IdMatch;
 import frugaldb.workload.FMeasurement;
 
 //import org.apache.log4j.BasicConfigurator;
@@ -437,7 +438,11 @@ public class Client
 			}
 		}
 
-
+		/**
+		 * newly added, for id match
+		 */
+		IdMatch.init(threadcount);
+		
 		@SuppressWarnings("rawtypes")
 		Class workloadclass = null;
 		try {
@@ -459,7 +464,6 @@ public class Client
 				System.exit(0);
 			}
 
-			//TODO: workload need to be different for each tenant
 			try {
 				workload=(Workload)workloadclass.newInstance();
 				
@@ -475,18 +479,18 @@ public class Client
 			//t.start();
 		}
 
-		StatusThread statusthread=null;
-
-		if (status)
-		{
-			boolean standardstatus=false;
-			if (props.getProperty("measurementtype","").compareTo("timeseries")==0) 
-			{
-				standardstatus=true;
-			}	
-			statusthread=new StatusThread(threads,label,standardstatus);
-			statusthread.start();
-		}
+//		StatusThread statusthread=null;
+//
+//		if (status)
+//		{
+//			boolean standardstatus=false;
+//			if (props.getProperty("measurementtype","").compareTo("timeseries")==0) 
+//			{
+//				standardstatus=true;
+//			}	
+//			statusthread=new StatusThread(threads,label,standardstatus);
+//			statusthread.start();
+//		}
 
 		long st=System.currentTimeMillis();
 
@@ -502,12 +506,15 @@ public class Client
 				int minute_per_interval = Integer.parseInt(props.getProperty(MINUTE_PER_INTERVAL_FRUGALDB, MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
 				//start test signal
 				for(Thread t : threads){
-					((ClientThread)t).checkOpcount(-1);
+					((ClientThread)t).checkOpcount(0);
 				}
 				Client.checkStart(true);
 				System.out.println("Starting FrugalDB test.");
 				
-				for(int i = 0; i < 11; i++){
+				String firstLine = reader.readLine();
+				String[] firsts = firstLine.split("\\s+");
+				total_interval = Integer.parseInt(firsts[1]);
+				for(int i = 0; i < 3+total_interval; i++){
 					reader.readLine();
 				}
 				for(int interval = 0; interval < total_interval; interval++){
@@ -542,24 +549,32 @@ public class Client
 					}
 				}
 				reader.close();
+				Thread.sleep(3000);
+				for(Thread t : threads){
+					FMeasurement.Measure.add(((ClientThread) t)._workload.measure);
+				}
 				FMeasurement.exportMeasure(props.getProperty(RESULT_FILE_FRUGALDB, "."));
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
-			maxExecutionTime = 3;
+			maxExecutionTime = 10;
 		}else{
 			Client.checkStart(true);
 		}
 		
 		
-    Thread terminator = null;
+//    Thread terminator = null;
     
     //@ this para means the time to wait before stopping all threads after workload done
-    if (maxExecutionTime > 0) {
-      terminator = new TerminatorThread(maxExecutionTime, threads, workload);
-      terminator.start();
-    }
+//    if (maxExecutionTime > 0) {
+//      terminator = new TerminatorThread(maxExecutionTime, threads, workload);
+//      terminator.start();
+//    }
+		for(Thread t : threads){
+			((ClientThread) t).getWorkload().requestStop();
+		}
     
+    System.out.println("joining threads...");
     for(Thread t : threads){
     	try {
 			t.join();
@@ -568,14 +583,15 @@ public class Client
 		}
     }
 		
-		if (terminator != null && !terminator.isInterrupted()) {
-      terminator.interrupt();
-    }
+    System.out.println("threads joined ...");
+//		if (terminator != null && !terminator.isInterrupted()) {
+//      terminator.interrupt();
+//    }
 
-		if (status)
-		{
-			statusthread.interrupt();
-		}
+//		if (status)
+//		{
+//			statusthread.interrupt();
+//		}
 
 		try
 		{

@@ -5,6 +5,7 @@ import java.util.Properties;
 import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import frugaldb.db.FrugalDBClient;
+import frugaldb.utility.IdMatch;
 
 
 /**
@@ -32,6 +33,9 @@ class ClientThread extends Thread
 	
 	public void setVoltdb(int id){
 		((FrugalDBClient) _db).setInVoltdb(id);
+	}
+	public Workload getWorkload(){
+		return _workload;
 	}
 
 	/**
@@ -65,7 +69,7 @@ class ClientThread extends Thread
 		return checkOpsdone(0);
 	}
 	/**
-	 * action = -1: reset _opsdone to 0
+	 * action = -1: reset _opsdone to 0; 
 	 * _opsdone += action otherwise.
 	 * @param action
 	 * @return
@@ -95,7 +99,8 @@ class ClientThread extends Thread
 	{
 		try
 		{
-			_db.init(_threadid);
+			_db.init();
+			_db.init(IdMatch.getId(_threadid));
 		}
 		catch (DBException e)
 		{
@@ -154,14 +159,17 @@ class ClientThread extends Thread
 						while(this.checkOpsdone(0) == this.checkOpcount(-1)){
 							try
 							{
-								sleep(1*1000);
+								sleep(1000);
 							}
 							catch (InterruptedException e)
 							{
 							  // do nothing.
 							}
+							if(_workload.isStopRequested()){
+								System.out.println("thread "+this._threadid+" stopping...");
+								return;
+							}
 						}
-//						this.checkOpsdone(-1);
 						st=System.currentTimeMillis();
 					}
 
@@ -195,15 +203,20 @@ class ClientThread extends Thread
 						while(this.checkOpcount(-1) == 0){
 							try
 							{
-								sleep(10*1000);
+								sleep(1000);
 							}
 							catch (InterruptedException e)
 							{
 							  // do nothing.
 							}
+							if(_workload.isStopRequested()){
+								System.out.println("thread "+this._threadid+" stopping...");
+								return;
+							}
 						}
 					}
 				}
+				System.out.println("thread "+this._threadid+" stopping...");
 			}
 			else
 			{

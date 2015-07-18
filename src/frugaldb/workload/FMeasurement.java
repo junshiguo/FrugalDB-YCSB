@@ -43,6 +43,7 @@ public class FMeasurement {
 			}
 			writer.newLine();
 			writer.flush();
+			min++;
 		}
 		writer.close();
 		
@@ -53,7 +54,7 @@ public class FMeasurement {
 		Collections.sort(all);
 		int totalNumber = all.size();
 		if(totalNumber == 0){
-			for(int i = 0; i < 10; i++){
+			for(int i = 0; i < 11; i++){
 				writer.write(""+(50+i*5)+" 0\n");
 			}
 		}else{
@@ -61,6 +62,8 @@ public class FMeasurement {
 				writer.write(""+(50+i*5)+" "+all.get((int) (totalNumber*(50+i*5)/100.0)));
 				writer.newLine();
 			}
+			writer.write("100 "+all.get(totalNumber -1));
+			writer.newLine();
 		}
 		writer.close();
 	}
@@ -71,7 +74,7 @@ public class FMeasurement {
 	private ArrayList<Long> latency = new ArrayList<Long>();
 	
 	public FMeasurement(){
-		Measure.add(this);
+//		Measure.add(this);
 	}
 	
 	public void measurement(int opcount, int opsdone){

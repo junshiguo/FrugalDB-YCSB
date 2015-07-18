@@ -306,6 +306,7 @@ public class CoreWorkload extends Workload
 	public Object initThread(Properties p, int mythreadid, int threadcount)
 			throws WorkloadException {
 		measure = new FMeasurement();
+//		FMeasurement.Measure.add(measure);
 		return super.initThread(p, mythreadid, threadcount);
 	}
 
