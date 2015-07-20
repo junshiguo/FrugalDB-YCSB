@@ -82,6 +82,15 @@ class ClientThread extends Thread
 		}
 		return _opsdone;
 	}
+	int _opsnull;
+	public synchronized int checkOpsnull(int action){
+		if(action == -1){
+			_opsnull = 0;
+		}else{
+			_opsnull += action;
+		}
+		return _opsnull;
+	}
 	/**
 	 * if load is less than 0, the _opcount will be returned; _opcount is set to load otherwise.
 	 * @param load per minute
@@ -147,74 +156,74 @@ class ClientThread extends Thread
 		{
 			if (_dotransactions)
 			{
-				long st=System.currentTimeMillis();
+//				long st=System.currentTimeMillis();
 
-				//TODO: the first condition is not necessary,_opcount is set by setLoad(int), sleep and interrupt
 //				while (((_opcount == 0) || (_opsdone < _opcount)) && !_workload.isStopRequested())
 				while (!_workload.isStopRequested())
 				{
 					
 					//newly added
-					if(this.checkOpsdone(0) == this.checkOpcount(-1)){
-						while(this.checkOpsdone(0) == this.checkOpcount(-1)){
-							try
-							{
-								sleep(1000);
-							}
-							catch (InterruptedException e)
-							{
-							  // do nothing.
-							}
-							if(_workload.isStopRequested()){
-								System.out.println("thread "+this._threadid+" stopping...");
-								return;
-							}
-						}
-						st=System.currentTimeMillis();
-					}
+//					if(this.checkOpsdone(0) == this.checkOpcount(-1)){
+//						while(this.checkOpsdone(0) == this.checkOpcount(-1)){
+//							try
+//							{
+//								sleep(1000);
+//							}
+//							catch (InterruptedException e)
+//							{
+//							  // do nothing.
+//							}
+//							if(_workload.isStopRequested()){
+//								System.out.println("thread "+this._threadid+" stopping...");
+//								return;
+//							}
+//						}
+//						st=System.currentTimeMillis();
+//					}
 
 					if (!_workload.doTransaction(_db,_workloadstate))
 					{
-						break;
+//						break;
+						this.checkOpsnull(+1);
 					}
 
 					this.checkOpsdone(1);
 
 					//throttle the operations
-					if (_target>0)
-					{
-						//this is more accurate than other throttling approaches we have tried,
-						//like sleeping for (1/target throughput)-operation latency,
-						//because it smooths timing inaccuracies (from sleep() taking an int, 
-						//current time in millis) over many operations
-						while (System.currentTimeMillis()-st<((double)this.checkOpsdone(0))/_target)
-						{
-							try
-							{
-								sleep(1);
-							}
-							catch (InterruptedException e)
-							{
-							  // do nothing.
-							}
-
-						}
-					}else{
-						while(this.checkOpcount(-1) == 0){
-							try
-							{
-								sleep(1000);
-							}
-							catch (InterruptedException e)
-							{
-							  // do nothing.
-							}
-							if(_workload.isStopRequested()){
-								System.out.println("thread "+this._threadid+" stopping...");
-								return;
-							}
-						}
-					}
+//					if (_target>0)
+//					{
+//						//this is more accurate than other throttling approaches we have tried,
+//						//like sleeping for (1/target throughput)-operation latency,
+//						//because it smooths timing inaccuracies (from sleep() taking an int, 
+//						//current time in millis) over many operations
+//						while (System.currentTimeMillis()-st<((double)this.checkOpsdone(0))/_target)
+//						{
+//							try
+//							{
+//								sleep(1);
+//							}
+//							catch (InterruptedException e)
+//							{
+//							  // do nothing.
+//							}
+//
+//						}
+//					}else{
+//						while(this.checkOpcount(-1) == 0){
+//							try
+//							{
+//								sleep(1000);
+//							}
+//							catch (InterruptedException e)
+//							{
+//							  // do nothing.
+//							}
+//							if(_workload.isStopRequested()){
+//								System.out.println("thread "+this._threadid+" stopping...");
+//								return;
+//							}
+//						}
+//					}
 				}
 				System.out.println("thread "+this._threadid+" stopping...");
 			}

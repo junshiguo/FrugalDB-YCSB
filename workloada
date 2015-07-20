@@ -28,9 +28,10 @@ operationcount=1000
 workload=frugaldb.workload.FrugalDBWorkload
 
 readallfields=true
+writeallfields=true
 
-readproportion=0.2
-updateproportion=0.8
+readproportion=0.8
+updateproportion=0.2
 scanproportion=0
 insertproportion=0
 
@@ -40,7 +41,7 @@ db.driver=com.mysql.jdbc.Driver
 db.url=jdbc:mysql://10.20.2.28/ycsb
 db.user=remote
 db.passwd=remote
-voltdbserver=10.20.2.28
+voltdbserver=127.0.0.1
 
 mmeasurementtype=timeseries
 

@@ -25,6 +25,7 @@ public class IdMatch {
 	
 	//start from 0
 	public static int getId(int tenantId){
+//		return 0;
 		if(totalTenant % 1000 == 0){
 			int multi = totalTenant / 1000;
 			int sum = 0;
@@ -74,6 +75,12 @@ public class IdMatch {
 		for(int i = 1; i < 18; i++){
 			startId[i] = startId[i-1] + tenantPerType[i-1];
 		}
+	}
+	
+	public static int getRecordCount(int id){
+		if(getId(id) < 1500)	return 5000;
+		else if(getId(id) < 2400)	return 10000;
+		else return 15000;
 	}
 
 }

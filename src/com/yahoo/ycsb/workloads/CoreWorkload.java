@@ -66,7 +66,10 @@ import java.util.Vector;
 public class CoreWorkload extends Workload
 {
 //	public FMeasurement measure = new FMeasurement();
-	
+	public static boolean MEASURE = true;
+	public static void setMeasure(boolean value){
+		MEASURE = value;
+	}
 	/**
 	 * The name of the database table to run queries against.
 	 */
@@ -487,14 +490,15 @@ public class CoreWorkload extends Workload
 	public boolean doTransaction(DB db, Object threadstate)
 	{
 		String op=operationchooser.nextString();
+		int result = 0;
 
 		if (op.compareTo("READ")==0)
 		{
-			doTransactionRead(db);
+			result = doTransactionRead(db);
 		}
 		else if (op.compareTo("UPDATE")==0)
 		{
-			doTransactionUpdate(db);
+			result = doTransactionUpdate(db);
 		}
 		else if (op.compareTo("INSERT")==0)
 		{
@@ -509,6 +513,7 @@ public class CoreWorkload extends Workload
 			doTransactionReadModifyWrite(db);
 		}
 		
+		if(result == 1) return false;
 		return true;
 	}
 
@@ -530,7 +535,7 @@ public class CoreWorkload extends Workload
         return keynum;
     }
 
-	public void doTransactionRead(DB db)
+	public int doTransactionRead(DB db)
 	{
 		//choose a random key
 		int keynum = nextKeynum();
@@ -549,9 +554,11 @@ public class CoreWorkload extends Workload
 		}
 
 		long start = System.currentTimeMillis();
-		db.read(table,keyname,fields,new HashMap<String,ByteIterator>());
+		int result = db.read(table,keyname,fields,new HashMap<String,ByteIterator>());
 		long end = System.currentTimeMillis();
-		measure.measurement(end - start);
+		if(MEASURE)
+			measure.measurement(end - start);
+		return result;
 	}
 	
 	public void doTransactionReadModifyWrite(DB db)
@@ -596,7 +603,8 @@ public class CoreWorkload extends Workload
 		long en=System.currentTimeMillis();
 		
 //		Measurements.getMeasurements().measure("READ-MODIFY-WRITE", (int)(en-st));
-		measure.measurement(en - st);
+		if(MEASURE)
+			measure.measurement(en - st);
 	}
 	
 	public void doTransactionScan(DB db)
@@ -623,10 +631,11 @@ public class CoreWorkload extends Workload
 		long start = System.currentTimeMillis();
 		db.scan(table,startkeyname,len,fields,new Vector<HashMap<String,ByteIterator>>());
 		long end = System.currentTimeMillis();
-		measure.measurement(end - start);
+		if(MEASURE)
+			measure.measurement(end - start);
 	}
 
-	public void doTransactionUpdate(DB db)
+	public int doTransactionUpdate(DB db)
 	{
 		//choose a random key
 		int keynum = nextKeynum();
@@ -647,9 +656,11 @@ public class CoreWorkload extends Workload
 		}
 
 		long start = System.currentTimeMillis();
-		db.update(table,keyname,values);
+		int result = db.update(table,keyname,values);
 		long end = System.currentTimeMillis();
-		measure.measurement(end - start);
+		if(MEASURE)
+			measure.measurement(end - start);
+		return result;
 	}
 
 	public void doTransactionInsert(DB db)
@@ -663,6 +674,7 @@ public class CoreWorkload extends Workload
 		long start = System.currentTimeMillis();
 		db.insert(table,dbkey,values);
 		long end = System.currentTimeMillis();
-		measure.measurement(end - start);
+		if(MEASURE)
+			measure.measurement(end - start);
 	}
 }

@@ -42,7 +42,7 @@ public class FServer {
 		return checkActive(0);
 	}
 
-	public static ArrayList<AbstractTenant> tenants = new ArrayList<AbstractTenant>();
+	public static ArrayList<AbstractTenant> tenants = new ArrayList<>();
 	
 	public static void main(String [] args) throws IOException{
 		String loadfile = "load.txt";
@@ -50,24 +50,26 @@ public class FServer {
 			loadfile = args[0];
 		}
 		//initial tenants
-		int intervalNumber;
+		int intervalNumber, totalTenant;
 		BufferedReader reader = new BufferedReader(new FileReader(loadfile));
 		String line = reader.readLine().trim();
 		String[] elements = line.split("\\s+");
-		intervalNumber = Integer.parseInt(elements[0]);
-		reader.readLine(); //slo line
-		line = reader.readLine().trim();
+		intervalNumber = Integer.parseInt(elements[1]);
+		totalTenant = Integer.parseInt(elements[0]);
+		String[] ids = reader.readLine().split("\\s+"); //id line
+		reader.readLine(); //slo
+		line = reader.readLine().trim(); //ds
 		elements = line.split("\\s+");
-		for(int i = 0; i < 3000; i++){
-			tenants.add(new FTenant(i, Integer.parseInt(elements[i]), intervalNumber));
+		for(int i = 0; i < 2000; i++){
+			tenants.add(new FTenant(Integer.parseInt(ids[i]), Integer.parseInt(elements[i]), intervalNumber));
 		}
 		for(int i = 0; i < intervalNumber; i++)
 			reader.readLine();
 		for(int i = 0; i < intervalNumber; i++){
 			line = reader.readLine().trim();
 			elements = line.split("\\s+");
-			for(int j = 1; j < 3001; j++){
-				((FTenant) tenants.get(j)).setWorkload(i, Integer.parseInt(elements[j]));
+			for(int j = 0; j < totalTenant; j++){
+				((FTenant) tenants.get(j)).setWorkload(i, Integer.parseInt(elements[j+1]));
 			}
 			for(int j = 0; j < 4; j++)
 				reader.readLine();

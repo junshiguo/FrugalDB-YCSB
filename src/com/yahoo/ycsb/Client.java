@@ -25,10 +25,12 @@ import java.util.*;
 import com.yahoo.ycsb.measurements.Measurements;
 import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
 import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
+import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import frugaldb.db.FrugalDBClient;
 import frugaldb.utility.IdMatch;
 import frugaldb.workload.FMeasurement;
+import frugaldb.workload.FrugalDBWorkload;
 
 //import org.apache.log4j.BasicConfigurator;
 
@@ -300,6 +302,15 @@ public class Client
 				//System.out.println("["+name+"]=["+value+"]");
 				argindex++;
 			}
+			else if (args[argindex].compareTo("-interval") == 0){
+				argindex++;
+				if(argindex >= args.length){
+					usageMessage();
+					System.exit(0);
+				}
+				props.put("interval", args[argindex]);
+				argindex++;
+			}
 			else
 			{
 				System.out.println("Unknown option "+args[argindex]);
@@ -390,31 +401,31 @@ public class Client
 		//load the workload
 		ClassLoader classLoader = Client.class.getClassLoader();
 
-		Workload workload=null;
+//		Workload workload=null;
 
-		try 
-		{
-			Class workloadclass = classLoader.loadClass(props.getProperty(WORKLOAD_PROPERTY));
-
-			workload=(Workload)workloadclass.newInstance();
-		}
-		catch (Exception e) 
-		{  
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			System.exit(0);
-		}
-
-		try
-		{
-			workload.init(props);
-		}
-		catch (WorkloadException e)
-		{
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			System.exit(0);
-		}
+//		try 
+//		{
+//			Class workloadclass = classLoader.loadClass(props.getProperty(WORKLOAD_PROPERTY));
+//
+//			workload=(Workload)workloadclass.newInstance();
+//		}
+//		catch (Exception e) 
+//		{  
+//			e.printStackTrace();
+//			e.printStackTrace(System.out);
+//			System.exit(0);
+//		}
+//
+//		try
+//		{
+//			workload.init(props);
+//		}
+//		catch (WorkloadException e)
+//		{
+//			e.printStackTrace();
+//			e.printStackTrace(System.out);
+//			System.exit(0);
+//		}
 		
 		warningthread.interrupt();
 
@@ -452,16 +463,18 @@ public class Client
 			e1.printStackTrace();
 			System.exit(0);
 		}
+		Workload workload = null;
 		for (int threadid=0; threadid<threadcount; threadid++)
 		{
 			DB db=new FrugalDBClient();
 			db.setProperties(props);
 
 			try {
-				workload=(Workload)workloadclass.newInstance();
-				
+//				workload=(Workload)workloadclass.newInstance();
+				workload = new FrugalDBWorkload();
+				props.setProperty("recordcount", ""+IdMatch.getRecordCount(threadid));
 				workload.init(props);
-			} catch (InstantiationException | IllegalAccessException | WorkloadException e) {
+			} catch (WorkloadException e) {
 				e.printStackTrace();
 				System.exit(0);
 			}
@@ -470,6 +483,11 @@ public class Client
 
 			threads.add(t);
 			t.start();
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
 //		StatusThread statusthread=null;
@@ -494,60 +512,71 @@ public class Client
 		
 		if(dotransactions){
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt")));
-				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
-				int minute_per_interval = Integer.parseInt(props.getProperty(MINUTE_PER_INTERVAL_FRUGALDB, MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
+//				BufferedReader reader = new BufferedReader(new FileReader(props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt")));
+//				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
+//				int minute_per_interval = Integer.parseInt(props.getProperty(MINUTE_PER_INTERVAL_FRUGALDB, MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
 				//start test signal
-				for(Thread t : threads){
-					((ClientThread)t).checkOpcount(0);
-				}
+//				for(Thread t : threads){
+//					((ClientThread)t).checkOpcount(0);
+//				}
 				Client.checkStart(true);
+				CoreWorkload.setMeasure(false);
 				System.out.println("Starting FrugalDB test.");
 				
-				String firstLine = reader.readLine();
-				String[] firsts = firstLine.split("\\s+");
-				total_interval = Integer.parseInt(firsts[1]);
-				for(int i = 0; i < 3+total_interval; i++){
-					reader.readLine();
-				}
-				for(int interval = 0; interval < total_interval; interval++){
-					for(int minute = 0; minute < minute_per_interval; minute++){
+//				String firstLine = reader.readLine();
+//				String[] firsts = firstLine.split("\\s+");
+//				total_interval = Integer.parseInt(firsts[1]);
+//				for(int i = 0; i < 3+total_interval; i++){
+//					reader.readLine();
+//				}
+				BufferedWriter writer =  new BufferedWriter(new FileWriter("throughput.txt", true));
+				int totalinterval = Integer.parseInt(props.getProperty("interval", "2"));
+				for(int interval = 0; interval < totalinterval; interval++){
+					for(int minute = 0; minute < 5; minute++){
 						//update opcount to workload, update opdone to 0
-						String line = reader.readLine();
-						if(line == null){
-							System.out.println("Fail to read from load file! Stopping...");
-							reader.close();
-							return;
-						}
-						String[] load = line.split("\\s+");
+//						String line = reader.readLine();
+//						if(line == null){
+//							System.out.println("Fail to read from load file! Stopping...");
+//							reader.close();
+//							return;
+//						}
+//						String[] load = line.split("\\s+");
 						for(int i = 0; i < threads.size(); i++){
-							((ClientThread) threads.get(i)).checkOpcount(Integer.parseInt(load[i+1]));
+//							((ClientThread) threads.get(i)).checkOpcount(Integer.parseInt(load[i+1]));
 							((ClientThread) threads.get(i)).checkOpsdone(-1);
+							((ClientThread) threads.get(i)).checkOpsnull(-1);
 						}
 						//sleep while client threads do transactions 
 						Thread.sleep(60*1000);
 						//summary measurements and write to file
-						int vq = 0, vt = 0;
+//						int vq = 0, vt = 0;
+						int sum = 0, sumnull = 0;
 						for(Thread t : threads){
-							((ClientThread) t)._workload.measure.measurement(((ClientThread) t).checkOpcount(-1), ((ClientThread) t).getOpsDone());
-							int tmp = ((ClientThread) t).checkOpcount(-1) - ((ClientThread) t).getOpsDone();
-							if(tmp > 0){
-								vq += tmp;
-								vt ++;
-							}
+//							((ClientThread) t)._workload.measure.measurement(((ClientThread) t).checkOpcount(-1), ((ClientThread) t).getOpsDone());
+//							int tmp = ((ClientThread) t).checkOpcount(-1) - ((ClientThread) t).getOpsDone();
+//							if(tmp > 0){
+//								vq += tmp;
+//								vt ++;
+//							}
+							sum += ((ClientThread) t).getOpsDone();
+							sumnull += ((ClientThread) t).checkOpsnull(0);
 						}
-						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
+						System.out.println("Minute "+(interval*5+minute+1)+" throughput "+sum+", null operation: "+sumnull);
+						writer.write(""+(interval*5+minute+1)+" "+sum+"\n");
+						writer.flush();
+//						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
 						//TODO: this export measurements remain unchecked
 //						Client.exportMeasurements(props, opsdone);
 					}
 				}
-				reader.close();
+				writer.close();
+//				reader.close();
 				Thread.sleep(3000);
-				for(Thread t : threads){
-					FMeasurement.Measure.add(((ClientThread) t)._workload.measure);
-				}
-				FMeasurement.exportMeasure(props.getProperty(RESULT_FILE_FRUGALDB, "."));
-			} catch (IOException | InterruptedException e) {
+//				for(Thread t : threads){
+//					FMeasurement.Measure.add(((ClientThread) t)._workload.measure);
+//				}
+//				FMeasurement.exportMeasure(props.getProperty(RESULT_FILE_FRUGALDB, "."));
+			} catch (InterruptedException | IOException e) {
 				e.printStackTrace();
 			}
 			maxExecutionTime = 10;
@@ -565,6 +594,11 @@ public class Client
 //    }
 		for(Thread t : threads){
 			((ClientThread) t).getWorkload().requestStop();
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
     
     System.out.println("joining threads...");

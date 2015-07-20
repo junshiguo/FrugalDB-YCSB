@@ -73,7 +73,7 @@ public class FrugalDBClient extends DB {
 		this.idInMysql = id;
 		try {
 			checkMysqlConnection();
-//			System.out.println(id+" "+this.getProperties().getProperty("db.url", "jdbc:mysql://127.0.0.1/ycsb"));
+			System.out.println(id+" "+this.getProperties().getProperty("db.url", "jdbc:mysql://127.0.0.1/ycsb"));
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -140,6 +140,8 @@ public class FrugalDBClient extends DB {
 //						result.put(rsmd.getColumnName(i), new ByteArrayByteIterator(rs.getString(i).getBytes()));
 //					}
 //				}
+				if(rs.next())	return 0;
+				return 1;
 			}else{
 				checkVoltdbConnection();
 				sql += " FROM "+table+idInVoltdb+" WHERE ycsb_key = '"+key+"' AND tenantId = "+idInMysql;
@@ -261,6 +263,8 @@ public class FrugalDBClient extends DB {
 					index++;
 				}
 				preparedUpdate.execute();
+				if(preparedUpdate.getUpdateCount() == 0)	return 1;
+				return 0;
 			}else{
 				checkVoltdbConnection();
 				String sql = "UPDATE "+table+idInVoltdb+" SET ";
