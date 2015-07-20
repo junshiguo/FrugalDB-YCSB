@@ -45,38 +45,7 @@ public class FServer {
 	public static ArrayList<AbstractTenant> tenants = new ArrayList<AbstractTenant>();
 	
 	public static void main(String [] args) throws IOException{
-		String loadfile = "load.txt";
-		if(args.length > 0){
-			loadfile = args[0];
-		}
-		//initial tenants
-		int intervalNumber, totalTenant;
-		BufferedReader reader = new BufferedReader(new FileReader(loadfile));
-		String line = reader.readLine().trim();
-		String[] elements = line.split("\\s+");
-		totalTenant = Integer.parseInt(elements[0]);
-		intervalNumber = Integer.parseInt(elements[1]);
-		String[] ids = reader.readLine().split("\\s+"); //id line
-		reader.readLine(); //slo line
-		line = reader.readLine().trim(); //ds
-		elements = line.split("\\s+");
-		for(int i = 0; i < totalTenant; i++){
-			tenants.add(new FTenant(Integer.parseInt(ids[i]), Integer.parseInt(elements[i]), intervalNumber));
-		}
-		for(int i = 0; i < intervalNumber; i++)
-			reader.readLine();
-		for(int i = 0; i < intervalNumber; i++){
-			line = reader.readLine().trim();
-			elements = line.split("\\s+");
-			for(int j = 0; j < totalTenant; j++){
-				((FTenant) tenants.get(j)).setWorkload(i, Integer.parseInt(elements[j+1]));
-			}
-			for(int j = 0; j < 4; j++)
-				reader.readLine();
-		}
-		reader.close();
-		
-		FOffloader decision = new FOffloader(tenants);
+		FOffloader decision = readLoad("load.txt");
 		
 		//set up sockets
 		ServerSocket serverSocket = new ServerSocket(SocketPort);
@@ -109,6 +78,39 @@ public class FServer {
 		}
 		
 		serverSocket.close();
+	}
+	
+	public static FOffloader readLoad(String loadfile) throws IOException{
+		//initial tenants
+		int intervalNumber, totalTenant;
+		BufferedReader reader = new BufferedReader(new FileReader(loadfile));
+		String line = reader.readLine().trim();
+		String[] elements = line.split("\\s+");
+		totalTenant = Integer.parseInt(elements[0]);
+		intervalNumber = Integer.parseInt(elements[1]);
+		String[] ids = reader.readLine().split("\\s+"); //id line
+		reader.readLine(); //slo line
+		line = reader.readLine().trim(); //ds
+		elements = line.split("\\s+");
+		tenants = new ArrayList<AbstractTenant>();
+		for(int i = 0; i < totalTenant; i++){
+			tenants.add(new FTenant(Integer.parseInt(ids[i]), Integer.parseInt(elements[i]), intervalNumber));
+		}
+		for(int i = 0; i < intervalNumber; i++)
+			reader.readLine();
+		for(int i = 0; i < intervalNumber; i++){
+			line = reader.readLine().trim();
+			elements = line.split("\\s+");
+			for(int j = 0; j < totalTenant; j++){
+				((FTenant) tenants.get(j)).setWorkload(i, Integer.parseInt(elements[j+1]));
+			}
+			for(int j = 0; j < 4; j++)
+				reader.readLine();
+		}
+		reader.close();
+		
+		FOffloader decision = new FOffloader(tenants);
+		return decision;
 	}
 	
 	/**

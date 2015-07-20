@@ -108,18 +108,9 @@ class ClientThread extends Thread
 			e.printStackTrace(System.out);
 			return;
 		}
-
-		try
-		{
-			_workloadstate=_workload.initThread(_props,_threadid,_threadcount);
-		}
-		catch (WorkloadException e)
-		{
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			return;
-		}
 		
+		System.out.println("Thread "+this._threadid+" started ...");
+
 		//wait until all threads are initialized, start operations together
 		while(Client.checkStart(false) == false){
 			try {
@@ -156,10 +147,12 @@ class ClientThread extends Thread
 					
 					//newly added
 					if(this.checkOpsdone(0) == this.checkOpcount(-1)){
+						int freetime = 0;
 						while(this.checkOpsdone(0) == this.checkOpcount(-1)){
 							try
 							{
 								sleep(1000);
+								freetime++;
 							}
 							catch (InterruptedException e)
 							{
@@ -168,6 +161,9 @@ class ClientThread extends Thread
 							if(_workload.isStopRequested()){
 								System.out.println("thread "+this._threadid+" stopping...");
 								return;
+							}
+							if(freetime >= 60){
+								((FrugalDBClient) this._db).closeConnection();
 							}
 						}
 						st=System.currentTimeMillis();

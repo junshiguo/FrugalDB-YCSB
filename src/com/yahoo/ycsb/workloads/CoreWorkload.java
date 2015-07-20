@@ -309,8 +309,6 @@ public class CoreWorkload extends Workload
 	@Override
 	public Object initThread(Properties p, int mythreadid, int threadcount)
 			throws WorkloadException {
-		measure = new FMeasurement();
-//		FMeasurement.Measure.add(measure);
 		return super.initThread(p, mythreadid, threadcount);
 	}
 
@@ -321,6 +319,7 @@ public class CoreWorkload extends Workload
 	 */
 	public void init(Properties p) throws WorkloadException
 	{
+		measure = new FMeasurement();
 		table = p.getProperty(TABLENAME_PROPERTY,TABLENAME_PROPERTY_DEFAULT);
 		
 		fieldcount=Integer.parseInt(p.getProperty(FIELD_COUNT_PROPERTY,FIELD_COUNT_PROPERTY_DEFAULT));

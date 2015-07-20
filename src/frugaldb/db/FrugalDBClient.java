@@ -56,11 +56,23 @@ public class FrugalDBClient extends DB {
 		}else if(mysqlStmt == null){
 			mysqlStmt = mysqlConn.createStatement();
 		}
+		_connected = true;
 	}
 	
 	public void checkVoltdbConnection(){
 		if(voltdbConn == null){
 			voltdbConn = DBManager.connectVoltdb(this.getProperties().getProperty("voltdbserver", "127.0.0.1"));
+		}
+		_connected = true;
+	}
+	
+	private boolean _connected =false;
+	public void closeConnection(){
+		if(_connected){
+			try {
+				cleanup();
+			} catch (DBException e) {
+			}
 		}
 	}
 	
@@ -71,15 +83,15 @@ public class FrugalDBClient extends DB {
 	public void init(int id) throws DBException
 	{
 		this.idInMysql = id;
-		try {
-			checkMysqlConnection();
-//			System.out.println(id+" "+this.getProperties().getProperty("db.url", "jdbc:mysql://127.0.0.1/ycsb"));
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		if(isInVoltdb()){
-			checkVoltdbConnection();
-		}
+//		try {
+//			checkMysqlConnection();
+////			System.out.println(id+" "+this.getProperties().getProperty("db.url", "jdbc:mysql://127.0.0.1/ycsb"));
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
+//		if(isInVoltdb()){
+//			checkVoltdbConnection();
+//		}
 	}
 	
 	/**

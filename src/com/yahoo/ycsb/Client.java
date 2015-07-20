@@ -250,6 +250,17 @@ public class Client
 				label=args[argindex];
 				argindex++;
 			}
+			else if (args[argindex].compareTo("-measure")==0)
+			{
+				argindex++;
+				if (argindex>=args.length)
+				{
+					usageMessage();
+					System.exit(0);
+				}
+				props.setProperty("measure", args[argindex]);
+				argindex++;
+			}
 			else if (args[argindex].compareTo("-P")==0)
 			{
 				argindex++;
@@ -441,7 +452,7 @@ public class Client
 			threads.add(t);
 			t.start();
 			try {
-				Thread.sleep(10);
+				Thread.sleep(5);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -471,7 +482,13 @@ public class Client
 				for(Thread t : threads){
 					((ClientThread)t).checkOpcount(0);
 				}
-				CoreWorkload.setMeasure(false);
+				boolean measure = true;
+				if(props.getProperty("measure","true").equals("true")){
+					measure = true;
+				}else{
+					measure = false;
+				}
+				CoreWorkload.setMeasure(measure);
 				Client.checkStart(true);
 				System.out.println("Starting FrugalDB test.");
 				
@@ -536,8 +553,9 @@ public class Client
 //    }
 		for(Thread t : threads){
 			((ClientThread) t).getWorkload().requestStop();
+			t.interrupt();
 			try {
-				Thread.sleep(10);
+				Thread.sleep(5);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

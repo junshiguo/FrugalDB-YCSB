@@ -28,13 +28,13 @@ public class FMeasurement {
 			}
 		}
 		
-		BufferedWriter writer = new BufferedWriter(new FileWriter(exportFile+".violation"));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(exportFile+".violation", true));
 		for(int i = 0; i < vq.length; i++){
 			writer.write(""+(i+1)+" "+vt[i]+" "+vq[i]+"\n");
 		}
 		writer.close();
 		
-		writer = new BufferedWriter(new FileWriter(exportFile+".allLtencies"));
+		writer = new BufferedWriter(new FileWriter(exportFile+".allLtencies", false));
 		int min = 1;
 		for(ArrayList<Long> list : latencies){
 			writer.write(""+min);
@@ -47,14 +47,14 @@ public class FMeasurement {
 		}
 		writer.close();
 		
-		writer = new BufferedWriter(new FileWriter(exportFile+"._Latency"));
+		writer = new BufferedWriter(new FileWriter(exportFile+"._Latency", true));
 		ArrayList<Long> all = new ArrayList<Long>();
 		for(ArrayList<Long> list : latencies)
 			all.addAll(list);
 		Collections.sort(all);
 		int totalNumber = all.size();
 		if(totalNumber == 0){
-			for(int i = 0; i < 11; i++){
+			for(int i = 0; i < 10; i++){
 				writer.write(""+(50+i*5)+" 0\n");
 			}
 		}else{
@@ -62,7 +62,7 @@ public class FMeasurement {
 				writer.write(""+(50+i*5)+" "+all.get((int) (totalNumber*(50+i*5)/100.0)));
 				writer.newLine();
 			}
-			writer.write("100 "+all.get(totalNumber -1));
+//			writer.write("100 "+all.get(totalNumber -1));
 			writer.newLine();
 		}
 		writer.close();
