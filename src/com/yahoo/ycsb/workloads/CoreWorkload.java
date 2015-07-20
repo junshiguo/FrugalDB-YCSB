@@ -66,6 +66,10 @@ import java.util.Vector;
 public class CoreWorkload extends Workload
 {
 //	public FMeasurement measure = new FMeasurement();
+	public static boolean MEASURE = true;
+	public static void setMeasure(boolean b) {
+		MEASURE = b;
+	}
 	
 	/**
 	 * The name of the database table to run queries against.
@@ -551,7 +555,8 @@ public class CoreWorkload extends Workload
 		long start = System.currentTimeMillis();
 		db.read(table,keyname,fields,new HashMap<String,ByteIterator>());
 		long end = System.currentTimeMillis();
-		measure.measurement(end - start);
+		if(MEASURE)
+			measure.measurement(end - start);
 	}
 	
 	public void doTransactionReadModifyWrite(DB db)
@@ -596,7 +601,8 @@ public class CoreWorkload extends Workload
 		long en=System.currentTimeMillis();
 		
 //		Measurements.getMeasurements().measure("READ-MODIFY-WRITE", (int)(en-st));
-		measure.measurement(en - st);
+		if(MEASURE)
+			measure.measurement(en - st);
 	}
 	
 	public void doTransactionScan(DB db)
@@ -623,7 +629,8 @@ public class CoreWorkload extends Workload
 		long start = System.currentTimeMillis();
 		db.scan(table,startkeyname,len,fields,new Vector<HashMap<String,ByteIterator>>());
 		long end = System.currentTimeMillis();
-		measure.measurement(end - start);
+		if(MEASURE)
+			measure.measurement(end - start);
 	}
 
 	public void doTransactionUpdate(DB db)
@@ -649,7 +656,8 @@ public class CoreWorkload extends Workload
 		long start = System.currentTimeMillis();
 		db.update(table,keyname,values);
 		long end = System.currentTimeMillis();
-		measure.measurement(end - start);
+		if(MEASURE)
+			measure.measurement(end - start);
 	}
 
 	public void doTransactionInsert(DB db)
@@ -663,6 +671,8 @@ public class CoreWorkload extends Workload
 		long start = System.currentTimeMillis();
 		db.insert(table,dbkey,values);
 		long end = System.currentTimeMillis();
-		measure.measurement(end - start);
+		if(MEASURE)
+			measure.measurement(end - start);
 	}
+
 }

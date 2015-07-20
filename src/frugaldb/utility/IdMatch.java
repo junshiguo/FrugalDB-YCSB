@@ -76,4 +76,13 @@ public class IdMatch {
 		}
 	}
 
+	public static int getRecordCount(int id) {
+		if (getId(id) < 1500)
+			return 5000;
+		else if (getId(id) < 2400)
+			return 10000;
+		else
+			return 15000;
+	}
+
 }

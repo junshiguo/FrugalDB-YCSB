@@ -25,10 +25,12 @@ import java.util.*;
 import com.yahoo.ycsb.measurements.Measurements;
 import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
 import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
+import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import frugaldb.db.FrugalDBClient;
 import frugaldb.utility.IdMatch;
 import frugaldb.workload.FMeasurement;
+import frugaldb.workload.FrugalDBWorkload;
 
 //import org.apache.log4j.BasicConfigurator;
 
@@ -390,32 +392,6 @@ public class Client
 		//load the workload
 		ClassLoader classLoader = Client.class.getClassLoader();
 
-		Workload workload=null;
-
-		try 
-		{
-			Class workloadclass = classLoader.loadClass(props.getProperty(WORKLOAD_PROPERTY));
-
-			workload=(Workload)workloadclass.newInstance();
-		}
-		catch (Exception e) 
-		{  
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			System.exit(0);
-		}
-
-		try
-		{
-			workload.init(props);
-		}
-		catch (WorkloadException e)
-		{
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			System.exit(0);
-		}
-		
 		warningthread.interrupt();
 
 		//run the workload
@@ -445,23 +421,17 @@ public class Client
 		IdMatch.init(threadcount);
 		
 		@SuppressWarnings("rawtypes")
-		Class workloadclass = null;
-		try {
-			workloadclass = classLoader.loadClass(props.getProperty(WORKLOAD_PROPERTY));
-		} catch (ClassNotFoundException e1) {
-			e1.printStackTrace();
-			System.exit(0);
-		}
+		Workload workload = null;
 		for (int threadid=0; threadid<threadcount; threadid++)
 		{
 			DB db=new FrugalDBClient();
 			db.setProperties(props);
 
 			try {
-				workload=(Workload)workloadclass.newInstance();
-				
+				workload = new FrugalDBWorkload();
+				props.setProperty("recordcount", ""+IdMatch.getRecordCount(threadid));
 				workload.init(props);
-			} catch (InstantiationException | IllegalAccessException | WorkloadException e) {
+			} catch (WorkloadException e) {
 				e.printStackTrace();
 				System.exit(0);
 			}
@@ -470,6 +440,11 @@ public class Client
 
 			threads.add(t);
 			t.start();
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 
 //		StatusThread statusthread=null;
@@ -487,11 +462,6 @@ public class Client
 
 		long st=System.currentTimeMillis();
 
-//		for (Thread t : threads)
-//		{
-//			t.start();
-//		}
-		
 		if(dotransactions){
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt")));
@@ -501,6 +471,7 @@ public class Client
 				for(Thread t : threads){
 					((ClientThread)t).checkOpcount(0);
 				}
+				CoreWorkload.setMeasure(false);
 				Client.checkStart(true);
 				System.out.println("Starting FrugalDB test.");
 				
@@ -565,6 +536,11 @@ public class Client
 //    }
 		for(Thread t : threads){
 			((ClientThread) t).getWorkload().requestStop();
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
     
     System.out.println("joining threads...");
