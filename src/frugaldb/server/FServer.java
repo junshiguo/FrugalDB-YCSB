@@ -9,11 +9,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import frugaldb.server.loader.LoaderMain;
 import newhybrid.util.AbstractTenant;
-import newhybrid.util.OffloadTenant;
 
 public class FServer {
+	public static boolean IS_MYSQL_TEST = true;
 	public static int SocketPort = 8899;
 	public static FSocketTask socketReceive;
 	public static FSocketTask socketSend;

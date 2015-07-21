@@ -2,8 +2,6 @@ package frugaldb.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.Socket;
@@ -54,12 +52,20 @@ public class FSocketTask extends Thread {
 				if (info[0].equalsIgnoreCase("interval")) {
 					//set interval id in LoadThread, and add semaphore to check to offload
 					LoadThread.setIntervalId(Integer.parseInt(info[1]));
-					FServer.loadThread.addSemaphore();
+					if(FServer.IS_MYSQL_TEST == false){
+						FServer.loadThread.addSemaphore();
+					}
 					System.out.println("Interval set to "+info[1]);
 				}else if(info[0].equalsIgnoreCase("loadfile")){
 					//read load file and set offloader in FServer
 					FServer.setOffloader(info[1]);
 					System.out.println("using load file: "+info[1]);
+				}else if(info[0].equalsIgnoreCase("test")){
+					if(info[1].equalsIgnoreCase("mysql")){
+						FServer.IS_MYSQL_TEST = true;
+					}else{
+						FServer.IS_MYSQL_TEST = false;
+					}
 				}else{
 					//end this socket, does not end the FServer process
 					System.out.println("receive: "+message+". Current test ends...");
