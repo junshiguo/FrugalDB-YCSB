@@ -29,11 +29,11 @@ public class OffloadThread extends Thread {
 	public void run(){
 		int next;
 		while((next = OffloadThread.nextToLoad()) != -1){
-			conn = DBManager.checkMysqlConn(conn);
-			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);
+//			conn = DBManager.checkMysqlConn(conn);
+//			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);
 			int vid = VMMatch.findVolumn();
-			Mysql2Voltdb m = new Mysql2Voltdb(conn, voltdbConn, next, vid);
-			m.run();
+//			Mysql2Voltdb m = new Mysql2Voltdb(conn, voltdbConn, next, vid);
+//			m.run();
 			try {
 				FServer.socketSend.sendM2V(next, vid);
 			} catch (IOException e) {

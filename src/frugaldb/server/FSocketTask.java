@@ -52,9 +52,17 @@ public class FSocketTask extends Thread {
 			while ((message = reader.readLine()) != null) {
 				info = message.trim().split("\\s+");
 				if (info[0].equalsIgnoreCase("interval")) {
-					FServer.setIntervalId(Integer.parseInt(info[1]));
+					//set interval id in LoadThread, and add semaphore to check to offload
+					LoadThread.setIntervalId(Integer.parseInt(info[1]));
+					FServer.loadThread.addSemaphore();
+					System.out.println("Interval set to "+info[1]);
+				}else if(info[0].equalsIgnoreCase("loadfile")){
+					//read load file and set offloader in FServer
+					FServer.setOffloader(info[1]);
+					System.out.println("using load file: "+info[1]);
 				}else{
-					FServer.checkActive(-1);
+					//end this socket, does not end the FServer process
+					System.out.println("receive: "+message+". Current test ends...");
 					break;
 				}
 			}

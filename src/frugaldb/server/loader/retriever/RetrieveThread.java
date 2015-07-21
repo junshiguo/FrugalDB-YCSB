@@ -25,8 +25,8 @@ public class RetrieveThread extends Thread {
 		int next;
 		while((next = RetrieveThread.nextToRetrive()) != -1){
 			int vid = VMMatch.findTenant(next);
-			Voltdb2Mysql m = new Voltdb2Mysql(next, vid);
-			m.run();
+//			Voltdb2Mysql m = new Voltdb2Mysql(next, vid);
+//			m.run();
 			try {
 				FServer.socketSend.sendV2M(next);
 			} catch (IOException e) {

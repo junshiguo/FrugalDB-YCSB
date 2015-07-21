@@ -17,69 +17,37 @@ public class FServer {
 	public static int SocketPort = 8899;
 	public static FSocketTask socketReceive;
 	public static FSocketTask socketSend;
-	public static int IntervalId = 0;
-	public static int getIntervalId() {
-		return IntervalId;
-	}
-	public static void setIntervalId(int intervalId) {
-		IntervalId = intervalId;
-		checkOffload(+1);
-	}
-	
-	public static int _checkOffload = 0;
-	public static synchronized int checkOffload(int i){
-		_checkOffload += i;
-		return _checkOffload;
-	}
-	
-	public static boolean ACTIVE = true;
-	public static synchronized boolean checkActive(int i){
-		if(i == -1)	ACTIVE = false;
-		else if(i == 1) ACTIVE	= true;
-		return ACTIVE;
-	}
-	public static boolean checkActive(){
-		return checkActive(0);
-	}
-
-	public static ArrayList<AbstractTenant> tenants = new ArrayList<AbstractTenant>();
+	public static FOffloader offloader;
+	public static LoadThread loadThread;
 	
 	public static void main(String [] args) throws IOException{
-		FOffloader decision = readLoad("load.txt");
+		loadThread = new LoadThread();
+		loadThread.start();
 		
 		//set up sockets
 		ServerSocket serverSocket = new ServerSocket(SocketPort);
-		serverSocket = lauchSocket(serverSocket);
-		serverSocket = lauchSocket(serverSocket);
-		
-		//do loading work
-		//receive socket get interval id, set FServer.intervalId; set all tenants' itervalId 
-		while(true){
-			if(checkOffload(0) != 0){
-				checkOffload(-1);
-				doOffload(decision.getOffloaderTenants());
-			}else{
-				try {
-					Thread.sleep(10000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			if(checkActive() == false){
-				break;
-			}
+		Socket socket;
+		while((socket = serverSocket.accept()) != null){
+			lauchSocket(socket);
 		}
-		
-		try {
-			socketSend.clean();
-			socketReceive.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
 		serverSocket.close();
 	}
 	
+	public static void setOffloader(String loadfile){
+		try {
+			offloader = readLoad(loadfile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * read from loadfile, initial a new offloader decision
+	 * 
+	 * called when FSocketTask receives "loadfile filename"
+	 * @param loadfile
+	 * @throws IOException
+	 */
 	public static FOffloader readLoad(String loadfile) throws IOException{
 		//initial tenants
 		int intervalNumber, totalTenant;
@@ -92,7 +60,7 @@ public class FServer {
 		reader.readLine(); //slo line
 		line = reader.readLine().trim(); //ds
 		elements = line.split("\\s+");
-		tenants = new ArrayList<AbstractTenant>();
+		ArrayList<AbstractTenant> tenants = new ArrayList<AbstractTenant>();
 		for(int i = 0; i < totalTenant; i++){
 			tenants.add(new FTenant(Integer.parseInt(ids[i]), Integer.parseInt(elements[i]), intervalNumber));
 		}
@@ -109,47 +77,28 @@ public class FServer {
 		}
 		reader.close();
 		
-		FOffloader decision = new FOffloader(tenants);
-		return decision;
+		return new FOffloader(tenants);
 	}
 	
 	/**
-	 * retrieve first, then load.
-	 * socket messages are sent in OffloadThread and RetrieveThread.
-	 * @param offloadTenants
+	 * lauch socket task; 
+	 * only one instance of socketReceive and socketSend exist; 
+	 * normally, the two socket tasks will appear in pair
+	 * @param socket
+	 * @throws IOException
 	 */
-	public static void doOffload(ArrayList<OffloadTenant> offloadTenants){
-		ArrayList<Integer> toLoad = new ArrayList<Integer>();
-		ArrayList<Integer> toRetrive = new ArrayList<Integer>();
-		for(OffloadTenant tenant : offloadTenants){
-			if(tenant.isToVoltdb()){
-				toLoad.add(tenant.getID());
-			}else{
-				toRetrive.add(tenant.getID());
-			}
-		}
-		LoaderMain.retrive(toRetrive);
-		try {
-			LoaderMain.cleanTmpFile();
-			LoaderMain.load(toLoad);
-			LoaderMain.cleanTmpFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static ServerSocket lauchSocket(ServerSocket serverSocket) throws IOException{
-		Socket socket = serverSocket.accept();
+	public static void lauchSocket(Socket socket) throws IOException{
 		BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8"));
 		OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream(),"UTF-8");
 		String line = reader.readLine();
 		if(line.trim().equalsIgnoreCase("client to server")){
 			socketReceive = new FSocketTask(socket, reader, writer);
 			socketReceive.start();
+			System.out.println("client to server socket up...");
 		}else{
 			socketSend = new FSocketTask(socket, reader, writer);
+			System.out.println("server to client socket up...");
 		}
-		return serverSocket;
 	}
 
 }

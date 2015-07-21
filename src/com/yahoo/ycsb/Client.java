@@ -471,11 +471,13 @@ public class Client
 //			statusthread.start();
 //		}
 
-		long st=System.currentTimeMillis();
-
 		if(dotransactions){
 			try {
-				BufferedReader reader = new BufferedReader(new FileReader(props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt")));
+				SocketTask.lauchSockets(props.getProperty("voltdbserver", "127.0.0.1"));
+				String loadfile = props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt");
+				SocketTask.socketSend.sendLoadfile(loadfile);
+				
+				BufferedReader reader = new BufferedReader(new FileReader(loadfile));
 				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
 				int minute_per_interval = Integer.parseInt(props.getProperty(MINUTE_PER_INTERVAL_FRUGALDB, MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
 				//start test signal
@@ -490,7 +492,6 @@ public class Client
 				}
 				CoreWorkload.setMeasure(measure);
 				Client.checkStart(true);
-				System.out.println("Starting FrugalDB test.");
 				
 				String firstLine = reader.readLine();
 				String[] firsts = firstLine.split("\\s+");
@@ -498,7 +499,11 @@ public class Client
 				for(int i = 0; i < 3+total_interval; i++){
 					reader.readLine();
 				}
+				
+				Thread.sleep(3000); //wait for potential initialization work
+				System.out.println("Starting FrugalDB test. total interval: "+total_interval);
 				for(int interval = 0; interval < total_interval; interval++){
+					SocketTask.socketSend.sendInterval(interval);
 					for(int minute = 0; minute < minute_per_interval; minute++){
 						//update opcount to workload, update opdone to 0
 						String line = reader.readLine();
@@ -525,8 +530,6 @@ public class Client
 							}
 						}
 						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
-						//TODO: this export measurements remain unchecked
-//						Client.exportMeasurements(props, opsdone);
 					}
 				}
 				reader.close();
@@ -551,6 +554,10 @@ public class Client
 //      terminator = new TerminatorThread(maxExecutionTime, threads, workload);
 //      terminator.start();
 //    }
+		try {
+			SocketTask.socketSend.sendEnd();
+		} catch (IOException e1) {
+		}
 		for(Thread t : threads){
 			((ClientThread) t).getWorkload().requestStop();
 			t.interrupt();

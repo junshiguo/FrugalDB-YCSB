@@ -54,7 +54,7 @@ public class FTenant implements AbstractTenant {
 	 */
 	@Override
 	public int getWorkloadAhead() {
-		int interval = FServer.getIntervalId();
+		int interval = LoadThread.getIntervalId();
 		if(interval < workload.length - 2){
 			return workload[interval+2];
 		}

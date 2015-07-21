@@ -16,6 +16,20 @@ public class SocketTask extends Thread {
 	public static int SocketPort = 8899;
 	public static int TYPE_SEND = 0;
 	public static int TYPE_RECEIVE = 1;
+
+	public static SocketTask socketReceive;
+	public static SocketTask socketSend;
+	/**
+	 * the Client class is too crowded, thus socket relevant functions are placed here
+	 * @param server
+	 * @throws UnknownHostException
+	 * @throws IOException
+	 */
+	public static void lauchSockets(String server) throws UnknownHostException, IOException{
+		socketReceive = new SocketTask(server, SocketTask.TYPE_RECEIVE);
+		socketReceive.start();
+		socketSend = new SocketTask(server, SocketTask.TYPE_SEND);
+	}
 	
 	private int type;
 	private Socket socket;
@@ -42,7 +56,11 @@ public class SocketTask extends Thread {
 		writer.flush();
 	}
 	public void sendInterval(int in) throws IOException{
-		writer.write(""+in+"\n");
+		writer.write("interval "+in+"\n");
+		writer.flush();
+	}
+	public void sendLoadfile(String file) throws IOException{
+		writer.write("loadfile "+file+"\n");
 		writer.flush();
 	}
 	public void sendEnd() throws IOException{
