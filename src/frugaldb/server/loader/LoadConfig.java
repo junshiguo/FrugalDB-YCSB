@@ -8,7 +8,7 @@ import java.util.Properties;
 public class LoadConfig {
 	public static String url = "jdbc:mysql://127.0.0.1/tpcc3000";
 	public static String username = "remote", password = "remote";
-	public static String voltdbServer = "127.0.0.1";
+	public static String voltdbServer = "10.20.2.28";
 	public static String dbname = "tpcc3000";
 	public static String csvPath = "/tmp/tmp";
 	public static int batch = 200;

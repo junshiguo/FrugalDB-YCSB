@@ -164,7 +164,8 @@ public class Client
 	}
 	public static Vector<Thread> threads=new Vector<Thread>();
 	public static void setVoltdb(int mid, int vid){
-		((ClientThread)threads.get(mid)).setVoltdb(vid);
+		//TODO: mid should be transformed to thread id
+		((ClientThread)threads.get(IdMatch.getThreadId(mid))).setVoltdb(vid);
 	}
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args)
@@ -261,6 +262,17 @@ public class Client
 				props.setProperty("measure", args[argindex]);
 				argindex++;
 			}
+			else if (args[argindex].compareTo("-testtype")==0)
+			{
+				argindex++;
+				if (argindex>=args.length)
+				{
+					usageMessage();
+					System.exit(0);
+				}
+				props.setProperty("testtype", args[argindex].trim());
+				argindex++;
+			}
 			else if (args[argindex].compareTo("-P")==0)
 			{
 				argindex++;
@@ -355,7 +367,7 @@ public class Client
 		long maxExecutionTime = Integer.parseInt(props.getProperty(MAX_EXECUTION_TIME, "0"));
 
 		//get number of threads, target and db
-		threadcount=Integer.parseInt(props.getProperty("threadcount","1"));
+		threadcount=Integer.parseInt(props.getProperty("threadcount","2000"));
 		dbname=props.getProperty("db","com.yahoo.ycsb.BasicDB");
 		target=Integer.parseInt(props.getProperty("target","0"));
 		
@@ -426,11 +438,7 @@ public class Client
 			}
 		}
 
-		/**
-		 * newly added, for id match
-		 */
 		IdMatch.init(threadcount);
-		
 		@SuppressWarnings("rawtypes")
 		Workload workload = null;
 		for (int threadid=0; threadid<threadcount; threadid++)
@@ -476,6 +484,7 @@ public class Client
 				SocketTask.lauchSockets(props.getProperty("voltdbserver", "127.0.0.1"));
 				String loadfile = props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt");
 				SocketTask.socketSend.sendLoadfile(loadfile);
+				SocketTask.socketSend.sendTestType(props.getProperty("testtype", "mysql"));
 				
 				BufferedReader reader = new BufferedReader(new FileReader(loadfile));
 				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
@@ -484,6 +493,19 @@ public class Client
 				for(Thread t : threads){
 					((ClientThread)t).checkOpcount(0);
 				}
+				
+				String firstLine = reader.readLine();
+				String[] firsts = firstLine.split("\\s+");
+				total_interval = Integer.parseInt(firsts[1]);
+				firsts = reader.readLine().trim().split("\\s+");
+				int[] ids = new int[threadcount];
+				for(int i = 0; i < threadcount; i++)
+					ids[i] = Integer.parseInt(firsts[i]) - 1;
+				IdMatch.initIdMatch(ids);
+				for(int i = 0; i < 2+total_interval; i++){
+					reader.readLine();
+				}
+				
 				boolean measure = true;
 				if(props.getProperty("measure","true").equals("true")){
 					measure = true;
@@ -492,14 +514,6 @@ public class Client
 				}
 				CoreWorkload.setMeasure(measure);
 				Client.checkStart(true);
-				
-				String firstLine = reader.readLine();
-				String[] firsts = firstLine.split("\\s+");
-				total_interval = Integer.parseInt(firsts[1]);
-				for(int i = 0; i < 3+total_interval; i++){
-					reader.readLine();
-				}
-				
 				Thread.sleep(3000); //wait for potential initialization work
 				System.out.println("Starting FrugalDB test. total interval: "+total_interval);
 				for(int interval = 0; interval < total_interval; interval++){

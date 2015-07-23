@@ -41,7 +41,7 @@ public class SocketTask extends Thread {
 		reader = new BufferedReader(new InputStreamReader(socket.getInputStream(),"UTF-8"));
 		writer = new OutputStreamWriter(socket.getOutputStream(),"UTF-8");
 		this.type = type;
-		if(this.type == 0){
+		if(this.type == TYPE_SEND){
 			writer.write("client to server\n");
 			writer.flush();
 		}else{
@@ -52,19 +52,24 @@ public class SocketTask extends Thread {
 	
 	//send task
 	public void send(String line) throws IOException{
-		writer.write(line+"\n");
+		writer.write(line);
 		writer.flush();
 	}
 	public void sendInterval(int in) throws IOException{
-		writer.write("interval "+in+"\n");
-		writer.flush();
+		send("interval "+in+"\n");
 	}
 	public void sendLoadfile(String file) throws IOException{
-		writer.write("loadfile "+file+"\n");
-		writer.flush();
+		send("loadfile "+file+"\n");
 	}
 	public void sendEnd() throws IOException{
-		writer.write("end\n");
+		send("end\n");
+	}
+	/**
+	 * @param type should be mysql or frugaldb
+	 * @throws IOException
+	 */
+	public void sendTestType(String type) throws IOException{
+		writer.write("test "+type+"\n");
 		writer.flush();
 	}
 	public void clean() throws IOException{

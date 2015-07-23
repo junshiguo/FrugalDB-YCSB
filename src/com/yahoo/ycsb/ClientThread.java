@@ -100,7 +100,7 @@ class ClientThread extends Thread
 		try
 		{
 			_db.init();
-			_db.init(IdMatch.getId(_threadid));
+			_db.init(IdMatch.getMysqlId(_threadid));
 		}
 		catch (DBException e)
 		{
@@ -109,7 +109,7 @@ class ClientThread extends Thread
 			return;
 		}
 		
-		System.out.println("Thread "+this._threadid+" started ...");
+//		System.out.println("Thread "+this._threadid+" started ...");
 
 		//wait until all threads are initialized, start operations together
 		while(Client.checkStart(false) == false){

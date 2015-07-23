@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import frugaldb.utility.IdMatch;
 import newhybrid.util.AbstractTenant;
 
 public class FServer {
@@ -20,6 +21,8 @@ public class FServer {
 	public static LoadThread loadThread;
 	
 	public static void main(String [] args) throws IOException{
+		IdMatch.init(2000);
+		
 		loadThread = new LoadThread();
 		loadThread.start();
 		
@@ -40,6 +43,7 @@ public class FServer {
 		}
 	}
 	
+	public static ArrayList<AbstractTenant> tenants = new ArrayList<AbstractTenant>();
 	/**
 	 * read from loadfile, initial a new offloader decision
 	 * 
@@ -56,12 +60,18 @@ public class FServer {
 		totalTenant = Integer.parseInt(elements[0]);
 		intervalNumber = Integer.parseInt(elements[1]);
 		String[] ids = reader.readLine().split("\\s+"); //id line
+		int[] idss = new int[totalTenant];
+		for(int i = 0; i < totalTenant; i++){
+			idss[i] = Integer.parseInt(ids[i]) - 1;
+		}
+		IdMatch.initIdMatch(idss);
+		
 		reader.readLine(); //slo line
 		line = reader.readLine().trim(); //ds
 		elements = line.split("\\s+");
-		ArrayList<AbstractTenant> tenants = new ArrayList<AbstractTenant>();
+		tenants = new ArrayList<AbstractTenant>();
 		for(int i = 0; i < totalTenant; i++){
-			tenants.add(new FTenant(Integer.parseInt(ids[i]), Integer.parseInt(elements[i]), intervalNumber));
+			tenants.add(new FTenant(Integer.parseInt(ids[i]) - 1, Integer.parseInt(elements[i]), intervalNumber));
 		}
 		for(int i = 0; i < intervalNumber; i++)
 			reader.readLine();

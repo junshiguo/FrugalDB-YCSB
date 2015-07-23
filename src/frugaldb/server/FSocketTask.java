@@ -49,6 +49,7 @@ public class FSocketTask extends Thread {
 			String[] info = null;
 			while ((message = reader.readLine()) != null) {
 				info = message.trim().split("\\s+");
+				System.out.println("Receive: "+message);
 				if (info[0].equalsIgnoreCase("interval")) {
 					//set interval id in LoadThread, and add semaphore to check to offload
 					LoadThread.setIntervalId(Integer.parseInt(info[1]));

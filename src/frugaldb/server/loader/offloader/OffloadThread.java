@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import org.voltdb.client.Client;
 
 import frugaldb.server.FServer;
+import frugaldb.server.FTenant;
 import frugaldb.server.loader.VMMatch;
 import frugaldb.server.loader.utility.DBManager;
+import frugaldb.utility.IdMatch;
 
 public class OffloadThread extends Thread {
 	public static ArrayList<Integer> toLoad = new ArrayList<Integer>(); //a list of ids that are to be offloaded
@@ -29,11 +31,12 @@ public class OffloadThread extends Thread {
 	public void run(){
 		int next;
 		while((next = OffloadThread.nextToLoad()) != -1){
-//			conn = DBManager.checkMysqlConn(conn);
-//			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);
+			conn = DBManager.checkMysqlConn(conn);
+			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);
 			int vid = VMMatch.findVolumn();
-//			Mysql2Voltdb m = new Mysql2Voltdb(conn, voltdbConn, next, vid);
-//			m.run();
+			Mysql2Voltdb m = new Mysql2Voltdb(conn, voltdbConn, next, vid);
+			m.run();
+			((FTenant) FServer.tenants.get(IdMatch.getThreadId(next))).set2Voltdb(vid);
 			try {
 				FServer.socketSend.sendM2V(next, vid);
 			} catch (IOException e) {

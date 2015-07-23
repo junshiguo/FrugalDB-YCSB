@@ -13,38 +13,73 @@ public class IdMatch {
 		2400, 2472, 2580, 2700, 2880, 2928,
 		3000
 	};
+	public static int[] T2Mids; //threadid to mysqlid, 2000
+	public static int[] M2Tids; //mysqlid to threadid, 3000
 	
-	/**
-	 * this function must be called before using getId()
-	 * @param totaltenant
-	 */
 	public static void init(int totaltenant){
 		totalTenant = totaltenant;
 		initStartId();
 	}
+	/**
+	 * this function must be called before using getId()
+	 * @param totaltenant
+	 */
+	public static void initIdMatch(int[] ids){
+		T2Mids = new int[totalTenant];
+		M2Tids = new int[3000];
+		for(int i = 0; i < 3000; i++){
+			M2Tids[i] = -1;
+		}
+		for(int i = 0; i < totalTenant; i++){
+			T2Mids[i] = ids[i];
+			M2Tids[ids[i]] = i;
+		}
+	}
 	
-	//start from 0
-	public static int getId(int tenantId){
+	/**
+	 * return id starts from 0; 
+	 * @param threadId 
+	 * @return
+	 */
+	public static int getId(int threadId){
 		if(totalTenant % 1000 == 0){
 			int multi = totalTenant / 1000;
 			int sum = 0;
 			for(int i = 0; i < 18; i++){
-				if(sum + TenantPerType1000[i] * multi > tenantId){
-					if(i == 0)	return tenantId;
-					return TenantIdRange[i-1]+tenantId - sum;
+				if(sum + TenantPerType1000[i] * multi > threadId){
+					if(i == 0)	return threadId;
+					return TenantIdRange[i-1]+threadId - sum;
 				}else{
 					sum += TenantPerType1000[i] * multi;
 				}
 			}
 		}else{
 			for(int i = 0; i < 17; i++){
-				if(startId[i+1] > tenantId){
-					if(i == 0)	return tenantId;
-					return TenantIdRange[i-1]+tenantId - startId[i];
+				if(startId[i+1] > threadId){
+					if(i == 0)	return threadId;
+					return TenantIdRange[i-1]+threadId - startId[i];
 				}
 			}
 		}
-		return tenantId - startId[17] + TenantIdRange[16];
+		return threadId - startId[17] + TenantIdRange[16];
+	}
+	
+	/**
+	 * return id starts from 0
+	 * @param threadId
+	 * @return
+	 */
+	public static int getMysqlId(int threadId){
+//		return T2Mids[threadId];
+		return getId(threadId);
+	}
+	/**
+	 * return id starts from 0
+	 * @param mysqlId also known as id in db
+	 * @return
+	 */
+	public static int getThreadId(int mysqlId){
+		return M2Tids[mysqlId];
 	}
 	
 	public static int[] startId = new int[18];
@@ -76,10 +111,10 @@ public class IdMatch {
 		}
 	}
 
-	public static int getRecordCount(int id) {
-		if (getId(id) < 1500)
+	public static int getRecordCount(int threadId) {
+		if (getId(threadId) < 1500)
 			return 5000;
-		else if (getId(id) < 2400)
+		else if (getId(threadId) < 2400)
 			return 10000;
 		else
 			return 15000;

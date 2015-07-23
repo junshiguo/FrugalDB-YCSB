@@ -28,6 +28,7 @@ operationcount=1000
 workload=frugaldb.workload.FrugalDBWorkload
 
 readallfields=true
+writeallfields=true
 
 readproportion=0.8
 updateproportion=0.2
@@ -52,3 +53,4 @@ minuteperinterval_F=5
 #histogram.buckets=1000
 #timeseries.granularity=1000
 
+testtype=mysql

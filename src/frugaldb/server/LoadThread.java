@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import newhybrid.util.OffloadTenant;
 import frugaldb.server.loader.LoaderMain;
+import frugaldb.utility.IdMatch;
 
 public class LoadThread extends Thread {
 	public static int INTERVAL;

@@ -72,6 +72,7 @@ public class FrugalDBClient extends DB {
 				cleanup();
 			} catch (DBException e) {
 			}
+			_connected = false;
 		}
 	}
 	
@@ -102,18 +103,23 @@ public class FrugalDBClient extends DB {
 		try {
 			if(mysqlStmt != null){
 				mysqlStmt.close();
+				mysqlStmt = null;
 			}
 			if(preparedInsert != null){
 				preparedInsert.close();
+				preparedInsert = null;
 			}
 			if(preparedUpdate != null){
 				preparedUpdate.close();
+				preparedUpdate = null;
 			}
 			if(mysqlConn != null){
 				mysqlConn.close();
+				mysqlConn = null;
 			}
 			if(voltdbConn != null){
 				voltdbConn.close();
+				voltdbConn = null;
 			}
 		} catch (SQLException | InterruptedException e) {
 			e.printStackTrace();
@@ -178,6 +184,7 @@ public class FrugalDBClient extends DB {
 	}
 
 	/**
+	 * not supported now
 	 * Perform a range scan for a set of records in the database. Each field/value pair from the result will be stored in a HashMap.
 	 *
 	 * @param table The name of the table
@@ -273,14 +280,11 @@ public class FrugalDBClient extends DB {
 				}
 				preparedUpdate.execute();
 			}else{
+				//TODO: use voltprocedure to deal with unexpected chars
 				checkVoltdbConnection();
-				String sql = "UPDATE "+table+idInVoltdb+" SET ";
-				for (String k : values.keySet()){
-					sql += k+ " = '"+values.get(k).toString()+"',";
-				}
-				sql = sql.substring(0, sql.length()-1);
-				sql += " WHERE ycsb_key = '"+key+"' AND tenantId = "+idInMysql;
-				voltdbConn.callProcedure("@AdHoc", sql);
+				voltdbConn.callProcedure(table.toUpperCase()+idInVoltdb+".update", key, values.get("field0").toString(),values.get("field1").toString(), values.get("field2").toString(),values.get("field3").toString(),
+						values.get("field4").toString(),values.get("field5").toString(),values.get("field6").toString(),values.get("field7").toString(),values.get("field8").toString(),values.get("field9").toString(),
+						idInMysql, 0, 1, key, idInMysql);
 			}
 		} catch (SQLException | IOException | ProcCallException e) {
 			e.printStackTrace();
@@ -325,11 +329,14 @@ public class FrugalDBClient extends DB {
 			} else {
 				checkVoltdbConnection();
 				Object[] v =  values.values().toArray();
-				Object[] para = new Object[v.length+1];
+				Object[] para = new Object[v.length+4];
+				para[0] = key;
 				for(int i = 0; i < v.length; i++){
-					para[i] = v[i];
+					para[i+1] = v[i];
 				}
-				para[v.length] = idInMysql;
+				para[v.length+1] = idInMysql;
+				para[v.length+2] = 1;
+				para[v.length+3] = 0;
 				voltdbConn.callProcedure(table.toUpperCase()+idInVoltdb+".insert", para);
 			}
 		} catch (SQLException | IOException | ProcCallException e) {
