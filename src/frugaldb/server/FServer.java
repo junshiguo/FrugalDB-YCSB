@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import frugaldb.server.loader.VMMatch;
 import frugaldb.utility.IdMatch;
 import newhybrid.util.AbstractTenant;
 
@@ -33,6 +34,10 @@ public class FServer {
 			lauchSocket(socket);
 		}
 		serverSocket.close();
+	}
+	
+	public static void resetVMMacth(){
+		VMMatch.init();
 	}
 	
 	public static void setOffloader(String loadfile){

@@ -60,6 +60,7 @@ public class FSocketTask extends Thread {
 				}else if(info[0].equalsIgnoreCase("loadfile")){
 					//read load file and set offloader in FServer
 					FServer.setOffloader(info[1]);
+					FServer.resetVMMacth();
 					System.out.println("using load file: "+info[1]);
 				}else if(info[0].equalsIgnoreCase("test")){
 					if(info[1].equalsIgnoreCase("mysql")){

@@ -28,7 +28,7 @@ public class FMeasurement {
 			}
 		}
 		
-		BufferedWriter writer = new BufferedWriter(new FileWriter(exportFile+".violation", true));
+		BufferedWriter writer = new BufferedWriter(new FileWriter(exportFile+".violation", false));
 		for(int i = 0; i < vq.length; i++){
 			writer.write(""+(i+1)+" "+vt[i]+" "+vq[i]+"\n");
 		}
@@ -47,7 +47,7 @@ public class FMeasurement {
 		}
 		writer.close();
 		
-		writer = new BufferedWriter(new FileWriter(exportFile+"._Latency", true));
+		writer = new BufferedWriter(new FileWriter(exportFile+"._Latency", false));
 		ArrayList<Long> all = new ArrayList<Long>();
 		for(ArrayList<Long> list : latencies)
 			all.addAll(list);
