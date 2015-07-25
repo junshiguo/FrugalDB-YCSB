@@ -13,7 +13,7 @@ public class FOffloader extends Offloader {
 
 	@Override
 	public int getWorkloadLimitInMysql() {
-		return 18000;
+		return 13000;
 	}
 
 	@Override

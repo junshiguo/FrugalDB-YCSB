@@ -34,7 +34,7 @@ public class FMeasurement {
 		}
 		writer.close();
 		
-		writer = new BufferedWriter(new FileWriter(exportFile+".allLtencies", false));
+		writer = new BufferedWriter(new FileWriter(exportFile+".allLatencies", false));
 		int min = 1;
 		for(ArrayList<Long> list : latencies){
 			writer.write(""+min);

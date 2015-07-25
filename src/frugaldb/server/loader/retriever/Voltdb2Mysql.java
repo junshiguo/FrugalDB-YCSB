@@ -41,7 +41,7 @@ public class Voltdb2Mysql {
 				for (int i = 0; i < result.getRowCount(); i++) {
 					row = result.fetchRow(i);
 					for(int j = 0; j < 10; j++){
-						statements[0].setString(i+1, row.getString("field"+i));
+						statements[0].setString(j+1, row.getString("field"+j));
 					}
 					statements[0].setString(11, row.getString("ycsb_key"));
 					statements[0].addBatch();
@@ -58,7 +58,7 @@ public class Voltdb2Mysql {
 				for (int i = 0; i < result.getRowCount(); i++) {
 					row = result.fetchRow(i);
 					for(int j = 0; j < 10; j++){
-						statements[1].setString(i+2, row.getString("field"+i));
+						statements[1].setString(j+1, row.getString("field"+j));
 					}
 					statements[1].setString(1, row.getString("ycsb_key"));
 					statements[1].addBatch();
@@ -75,7 +75,7 @@ public class Voltdb2Mysql {
 				for (int i = 0; i < result.getRowCount(); i++) {
 					row = result.fetchRow(i);
 					for(int j = 0; j < 10; j++){
-						statements[1].setString(i+2, row.getString("field"+i));
+						statements[1].setString(j+1, row.getString("field"+j));
 					}
 					statements[1].setString(1, row.getString("ycsb_key"));
 					statements[1].addBatch();

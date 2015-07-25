@@ -18,7 +18,6 @@ public class OffloadInBulk {
 	public Connection conn;
 	public Client client;
 	public Statement stmt = null;
-	public double time2, time1, time3, time4, time5 = 0;
 	
 	public OffloadInBulk(int tenantId, int volumnId, Connection conn, Client client){
 		this.tenantId = tenantId;
@@ -46,11 +45,8 @@ public class OffloadInBulk {
 //			File file = new File(LoadConfig.csvPath+"/"+tables[tableId]+tenantId+".csv");
 //			file.delete();
 			
-			long start = System.nanoTime(); /////
 			stmt.execute(getSQL());
-			long end1 = System.nanoTime(); /////
 			client.callProcedure("@AdHoc", "delete from usertable"+volumnId+" where tenant_id = "+tenantId);
-			long end2 = System.nanoTime(); /////
 			
 			FileReader filereader = new FileReader(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
 			BufferedReader reader = new BufferedReader(filereader);
@@ -73,13 +69,6 @@ public class OffloadInBulk {
 				client.callProcedure("OffloadUsertable"+volumnId, tenantId, lines, count);
 			filereader.close();
 			reader.close();
-			long end3 = System.nanoTime(); /////
-			long end4 = System.nanoTime(); /////
-			time1 = (end1 - start) / 1000000000.0;
-			time2 = (end2 - end1) / 1000000000.0;
-			time3 = (end3 - end2) / 1000000000.0;
-			time4 = (end4 - end3) / 1000000000.0;
-			time5 = tsum / 1000000000.0;
 		} catch (SQLException | IOException | ProcCallException e) {
 			e.printStackTrace();
 		}
