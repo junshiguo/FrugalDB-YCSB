@@ -2,6 +2,7 @@ package frugaldb.server.loader.offloader;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import org.voltdb.client.Client;
@@ -34,9 +35,17 @@ public class OffloadThread extends Thread {
 			conn = DBManager.checkMysqlConn(conn);
 			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);
 			int vid = VMMatch.findVolumn();
-			Mysql2Voltdb m = new Mysql2Voltdb(conn, voltdbConn, next, vid);
-			m.run();
+			if(vid == -1){
+				continue;
+			}
+			VMMatch.addMatch(vid, next);
+			OffloadInBulk loader = new OffloadInBulk(next, vid, conn, voltdbConn);
+			long start = System.nanoTime();
+			loader.load();
 			((FTenant) FServer.tenants.get(IdMatch.getThreadId(next))).set2Voltdb(vid);
+			long end = System.nanoTime();
+			DecimalFormat df = new DecimalFormat(".0000");
+			System.out.println("Tenant "+next+" MySQL ---> VoltDB! Time spent: "+df.format((end-start)/1000000000.0)+" seconds!");
 			try {
 				FServer.socketSend.sendM2V(next, vid);
 			} catch (IOException e) {

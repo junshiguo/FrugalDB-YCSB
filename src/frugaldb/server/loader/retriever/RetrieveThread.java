@@ -33,12 +33,14 @@ public class RetrieveThread extends Thread {
 		int next;
 		while((next = RetrieveThread.nextToRetrive()) != -1){
 			int vid = VMMatch.findTenant(next);
+			if(vid == -1) continue;
 			conn = DBManager.checkMysqlConn(conn);
 			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);
 			Voltdb2Mysql m = new Voltdb2Mysql(next, vid, conn, voltdbConn);
 			long start = System.nanoTime();
 			m.run();
 			((FTenant) FServer.tenants.get(IdMatch.getThreadId(next))).set2Mysql();
+			VMMatch.deleteMatch(vid, next);
 			long end = System.nanoTime();
 			System.out.println("Tenant "+next+" VoltDB ---> MySQL! Time: "+(end - start)/1000000000.0+" seconds...");
 			try {
