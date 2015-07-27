@@ -68,6 +68,9 @@ public class FSocketTask extends Thread {
 					}else{
 						FServer.IS_MYSQL_TEST = false;
 					}
+				}else if(info[0].equalsIgnoreCase("voltdbspace")){
+					FOffloader.setTotSpaceInVoltdb(Integer.parseInt(info[1]));
+					System.out.println("Voltdb space set to "+info[1]);
 				}else{
 					//end this socket, does not end the FServer process
 					System.out.println("receive: "+message+". Current test ends...");

@@ -16,9 +16,13 @@ public class FOffloader extends Offloader {
 		return 13000;
 	}
 
+	public static int voltdbSpace = 2000;
 	@Override
 	public int getTotSpaceInVoltdb() {
-		return 2000;
+		return voltdbSpace;
+	}
+	public static void setTotSpaceInVoltdb(int s) {
+		voltdbSpace = s;
 	}
 
 	@Override

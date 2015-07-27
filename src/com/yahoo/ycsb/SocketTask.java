@@ -64,6 +64,9 @@ public class SocketTask extends Thread {
 	public void sendEnd() throws IOException{
 		send("end\n");
 	}
+	public void sendVoltdbSpace(int space) throws IOException{
+		send("voltdbspace "+space+"\n");
+	}
 	/**
 	 * @param type should be mysql or frugaldb
 	 * @throws IOException

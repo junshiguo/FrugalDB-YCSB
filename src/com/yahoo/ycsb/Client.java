@@ -485,6 +485,7 @@ public class Client
 				String loadfile = props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt");
 				SocketTask.socketSend.sendLoadfile(loadfile);
 				SocketTask.socketSend.sendTestType(props.getProperty("testtype", "mysql"));
+				SocketTask.socketSend.sendVoltdbSpace(Integer.parseInt(props.getProperty("voltdbspace", "2000")));
 				
 				BufferedReader reader = new BufferedReader(new FileReader(loadfile));
 				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
