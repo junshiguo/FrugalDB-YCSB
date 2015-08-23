@@ -39,6 +39,7 @@ public class CounterGenerator extends IntegerGenerator
 	 * If the generator returns numeric (integer) values, return the next value as an int. Default is to return -1, which
 	 * is appropriate for generators that do not return numeric values.
 	 */
+	@Override
 	public int nextInt() 
 	{
 		int ret = counter.getAndIncrement();

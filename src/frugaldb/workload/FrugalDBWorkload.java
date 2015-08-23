@@ -21,6 +21,7 @@ public class FrugalDBWorkload extends CoreWorkload {
      * Initialize the scenario. Create any generators and other shared objects here.
      * Called once, in the main client thread, before any operations are started.
      */
+	@Override
 	public void init(Properties p) throws WorkloadException {
 		super.init(p);
 	}
@@ -40,6 +41,7 @@ public class FrugalDBWorkload extends CoreWorkload {
      * Return true for workloads that rely on operationcount. 
      * For workloads that read traces from a file, return true when there are more to do, false when you are done.
      */
+	@Override
 	public Object initThread(Properties p, int mythreadid, int threadcount)
 			throws WorkloadException {
 		// TODO Auto-generated method stub
@@ -49,6 +51,7 @@ public class FrugalDBWorkload extends CoreWorkload {
 	/**
      * Cleanup the scenario. Called once, in the main client thread, after all operations have completed.
      */
+	@Override
 	public void cleanup() throws WorkloadException {
 		// TODO Auto-generated method stub
 		super.cleanup();
@@ -61,6 +64,7 @@ public class FrugalDBWorkload extends CoreWorkload {
      * effects other than DB operations and mutations on threadstate. Mutations to threadstate do not need to be
      * synchronized, since each thread has its own threadstate instance.
      */
+	@Override
 	public boolean doInsert(DB db, Object threadstate) {
 		// TODO Auto-generated method stub
 		return super.doInsert(db, threadstate);
@@ -75,6 +79,7 @@ public class FrugalDBWorkload extends CoreWorkload {
      * 
      * @return false if the workload knows it is done for this thread. Client will terminate the thread. Return true otherwise. Return true for workloads that rely on operationcount. For workloads that read traces from a file, return true when there are more to do, false when you are done.
      */
+	@Override
 	public boolean doTransaction(DB db, Object threadstate) {
 		// TODO Auto-generated method stub
 		return super.doTransaction(db, threadstate);

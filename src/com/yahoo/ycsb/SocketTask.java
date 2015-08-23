@@ -52,20 +52,20 @@ public class SocketTask extends Thread {
 	
 	//send task
 	public void send(String line) throws IOException{
-		writer.write(line);
+		writer.write(line+"\n");
 		writer.flush();
 	}
 	public void sendInterval(int in) throws IOException{
-		send("interval "+in+"\n");
+		send("interval "+in);
 	}
 	public void sendLoadfile(String file) throws IOException{
-		send("loadfile "+file+"\n");
+		send("loadfile "+file);
 	}
 	public void sendEnd() throws IOException{
-		send("end\n");
+		send("end");
 	}
 	public void sendVoltdbSpace(int space) throws IOException{
-		send("voltdbspace "+space+"\n");
+		send("voltdbspace "+space);
 	}
 	/**
 	 * @param type should be mysql or frugaldb
@@ -83,6 +83,7 @@ public class SocketTask extends Thread {
 	}
 	
 	//receive task
+	@Override
 	public void run(){
 		try {
 			String message = null;

@@ -19,8 +19,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Random;
-
 import com.yahoo.ycsb.Utils;
 import com.yahoo.ycsb.generator.IntegerGenerator;
 
@@ -89,7 +87,7 @@ public class HistogramGenerator extends IntegerGenerator {
 			weighted_area = i * buckets[i];
 		}
 		// calculate average file size
-		mean_size = ((double)block_size) * ((double)weighted_area) / (double)(area);
+		mean_size = ((double)block_size) * ((double)weighted_area) / (area);
 	}
 
 	@Override

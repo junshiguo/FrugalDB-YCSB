@@ -2,8 +2,6 @@ package com.yahoo.ycsb;
 
 import java.util.Properties;
 
-import com.yahoo.ycsb.workloads.CoreWorkload;
-
 import frugaldb.db.FrugalDBClient;
 import frugaldb.utility.IdMatch;
 
@@ -95,6 +93,7 @@ class ClientThread extends Thread
 		return _opcount;
 	}
 
+	@Override
 	public void run()
 	{
 		try
@@ -183,7 +182,7 @@ class ClientThread extends Thread
 						//like sleeping for (1/target throughput)-operation latency,
 						//because it smooths timing inaccuracies (from sleep() taking an int, 
 						//current time in millis) over many operations
-						while (System.currentTimeMillis()-st<((double)this.checkOpsdone(0))/_target)
+						while (System.currentTimeMillis()-st<(this.checkOpsdone(0))/_target)
 						{
 							try
 							{
@@ -234,7 +233,7 @@ class ClientThread extends Thread
 						//like sleeping for (1/target throughput)-operation latency,
 						//because it smooths timing inaccuracies (from sleep() taking an int, 
 						//current time in millis) over many operations
-						while (System.currentTimeMillis()-st<((double)_opsdone)/_target)
+						while (System.currentTimeMillis()-st<(_opsdone)/_target)
 						{
 							try 
 							{

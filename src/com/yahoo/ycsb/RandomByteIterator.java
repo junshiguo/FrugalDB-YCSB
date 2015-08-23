@@ -55,6 +55,7 @@ public class RandomByteIterator extends ByteIterator {
 		this.off = 0;
 	}
 
+	@Override
 	public byte nextByte() {
 		fillBytes();
 		buf_off++;

@@ -19,7 +19,6 @@ package com.yahoo.ycsb;
 
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.*;
 
 import com.yahoo.ycsb.measurements.Measurements;
@@ -164,7 +163,6 @@ public class Client
 	}
 	public static Vector<Thread> threads=new Vector<Thread>();
 	public static void setVoltdb(int mid, int vid){
-		//TODO: mid should be transformed to thread id
 		((ClientThread)threads.get(IdMatch.getThreadId(mid))).setVoltdb(vid);
 	}
 	@SuppressWarnings("unchecked")
@@ -391,32 +389,10 @@ public class Client
 		//show a warning message that creating the workload is taking a while
 		//but only do so if it is taking longer than 2 seconds 
 		//(showing the message right away if the setup wasn't taking very long was confusing people)
-		Thread warningthread=new Thread() 
-		{
-			public void run()
-			{
-				try
-				{
-					sleep(2000);
-				}
-				catch (InterruptedException e)
-				{
-					return;
-				}
-				System.err.println(" (might take a few minutes for large data sets)");
-			}
-		};
-
-		warningthread.start();
 		
 		//set up measurements
 		Measurements.setProperties(props);
 		
-		//load the workload
-		ClassLoader classLoader = Client.class.getClassLoader();
-
-		warningthread.interrupt();
-
 		//run the workload
 
 		System.err.println("Starting test.");
@@ -478,12 +454,19 @@ public class Client
 //			statusthread=new StatusThread(threads,label,standardstatus);
 //			statusthread.start();
 //		}
-
+		int returnstatus = 10;
 		if(dotransactions){
 			try {
 				SocketTask.lauchSockets(props.getProperty("voltdbserver", "127.0.0.1"));
 				String loadfile = props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt");
 				SocketTask.socketSend.sendLoadfile(loadfile);
+				BufferedReader loadReader = new BufferedReader(new FileReader(loadfile));
+				String loadline;
+				while((loadline = loadReader.readLine()) != null){
+					SocketTask.socketSend.send(loadline);
+				}
+				SocketTask.socketSend.send("eof");
+				loadReader.close();
 				SocketTask.socketSend.sendTestType(props.getProperty("testtype", "mysql"));
 				SocketTask.socketSend.sendVoltdbSpace(Integer.parseInt(props.getProperty("voltdbspace", "2000")));
 				
@@ -519,13 +502,14 @@ public class Client
 				System.out.println("Starting FrugalDB test. total interval: "+total_interval);
 				for(int interval = 0; interval < total_interval; interval++){
 					SocketTask.socketSend.sendInterval(interval);
+					long vtSum = 0, vqSum = 0, vm = 0;
 					for(int minute = 0; minute < minute_per_interval; minute++){
 						//update opcount to workload, update opdone to 0
 						String line = reader.readLine();
 						if(line == null){
 							System.out.println("Fail to read from load file! Stopping...");
 							reader.close();
-							return;
+							System.exit(1);
 						}
 						String[] load = line.split("\\s+");
 						for(int i = 0; i < threads.size(); i++){
@@ -544,7 +528,15 @@ public class Client
 								vt ++;
 							}
 						}
+						vtSum += vt;
+						vqSum += vq;
+						if(vt > 0)	vm++;
 						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
+					}
+					if(interval != 0 && (vqSum > 1000 || vtSum > 50) && vm > 1){
+						System.out.println("too many violations, setting return status to 1...");
+						returnstatus = 1;
+//						System.exit(1);
 					}
 				}
 				reader.close();
@@ -607,7 +599,7 @@ public class Client
 			workload.cleanup();
 		}
 		catch (WorkloadException e)
-		{
+		{ 
 			e.printStackTrace();
 			e.printStackTrace(System.out);
 			System.exit(0);
@@ -624,6 +616,6 @@ public class Client
 //			System.exit(-1);
 //		}
 
-		System.exit(0);
+		System.exit(returnstatus);
 	}
 }

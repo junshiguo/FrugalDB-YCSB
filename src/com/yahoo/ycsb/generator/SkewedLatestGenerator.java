@@ -35,6 +35,7 @@ public class SkewedLatestGenerator extends IntegerGenerator
 	/**
 	 * Generate the next string in the distribution, skewed Zipfian favoring the items most recently returned by the basis generator.
 	 */
+	@Override
 	public int nextInt()
 	{
 		int max=_basis.lastInt();

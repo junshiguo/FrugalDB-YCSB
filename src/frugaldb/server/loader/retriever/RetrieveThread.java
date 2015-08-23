@@ -29,6 +29,7 @@ public class RetrieveThread extends Thread {
 	
 	public Connection conn;
 	public Client voltdbConn;
+	@Override
 	public void run(){
 		int next;
 		while((next = RetrieveThread.nextToRetrive()) != -1){

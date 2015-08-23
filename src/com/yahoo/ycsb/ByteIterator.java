@@ -17,7 +17,6 @@
 package com.yahoo.ycsb;
 
 import java.util.Iterator;
-import java.util.ArrayList;
 /**
  * YCSB-specific buffer class.  ByteIterators are designed to support
  * efficient field generation, and to allow backend drivers that can stream
@@ -72,6 +71,7 @@ public abstract class ByteIterator implements Iterator<Byte> {
 	}
 
 	/** Consumes remaining contents of this object, and returns them as a string. */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		while(this.hasNext()) { sb.append((char)nextByte()); }

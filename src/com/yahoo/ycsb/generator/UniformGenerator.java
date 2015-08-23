@@ -44,6 +44,7 @@ public class UniformGenerator extends Generator
 	/**
 	 * Generate the next string in the distribution.
 	 */
+	@Override
 	public String nextString()
 	{
 		_laststring=_values.elementAt(_gen.nextInt());
@@ -55,6 +56,7 @@ public class UniformGenerator extends Generator
 	 * Calling lastString() should not advance the distribution or have any side effects. If nextString() has not yet 
 	 * been called, lastString() should return something reasonable.
 	 */
+	@Override
 	public String lastString()
 	{
 		if (_laststring==null)

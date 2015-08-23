@@ -32,8 +32,6 @@ import com.yahoo.ycsb.generator.ScrambledZipfianGenerator;
 import com.yahoo.ycsb.generator.SkewedLatestGenerator;
 import com.yahoo.ycsb.generator.UniformIntegerGenerator;
 import com.yahoo.ycsb.generator.ZipfianGenerator;
-import com.yahoo.ycsb.measurements.Measurements;
-
 import frugaldb.workload.FMeasurement;
 
 import java.io.IOException;
@@ -317,6 +315,7 @@ public class CoreWorkload extends Workload
 	 * Initialize the scenario. 
 	 * Called once, in the main client thread, before any operations are started.
 	 */
+	@Override
 	public void init(Properties p) throws WorkloadException
 	{
 		measure = new FMeasurement();
@@ -399,7 +398,7 @@ public class CoreWorkload extends Workload
 			//just ignore it and pick another key. this way, the size of the keyspace doesn't change from the perspective of the scrambled zipfian generator
 			
 			int opcount=Integer.parseInt(p.getProperty(Client.OPERATION_COUNT_PROPERTY));
-			int expectednewkeys=(int)(((double)opcount)*insertproportion*2.0); //2 is fudge factor
+			int expectednewkeys=(int)((opcount)*insertproportion*2.0); //2 is fudge factor
 			
 			keychooser=new ScrambledZipfianGenerator(recordcount+expectednewkeys);
 		}
@@ -470,6 +469,7 @@ public class CoreWorkload extends Workload
 	 * other, and it will be difficult to reach the target throughput. Ideally, this function would have no side
 	 * effects other than DB operations.
 	 */
+	@Override
 	public boolean doInsert(DB db, Object threadstate)
 	{
 		int keynum=keysequence.nextInt();
@@ -487,6 +487,7 @@ public class CoreWorkload extends Workload
 	 * other, and it will be difficult to reach the target throughput. Ideally, this function would have no side
 	 * effects other than DB operations.
 	 */
+	@Override
 	public boolean doTransaction(DB db, Object threadstate)
 	{
 		String op=operationchooser.nextString();

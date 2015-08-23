@@ -17,8 +17,6 @@
 
 package com.yahoo.ycsb.generator;
 
-import java.util.Random;
-
 import com.yahoo.ycsb.Utils;
 
 /**
@@ -52,6 +50,6 @@ public class UniformIntegerGenerator extends IntegerGenerator
 
 	@Override
 	public double mean() {
-		return ((double)((long)(_lb + (long)_ub))) / 2.0;
+		return ((_lb + (long)_ub)) / 2.0;
 	}
 }

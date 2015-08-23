@@ -18,8 +18,6 @@
 package com.yahoo.ycsb.generator;
 
 import java.util.Vector;
-import java.util.Random;
-
 import com.yahoo.ycsb.Utils;
 import com.yahoo.ycsb.WorkloadException;
 
@@ -52,6 +50,7 @@ public class DiscreteGenerator extends Generator
 	/**
 	 * Generate the next string in the distribution.
 	 */
+	@Override
 	public String nextString()
 	{
 		double sum=0;
@@ -97,6 +96,7 @@ public class DiscreteGenerator extends Generator
 	 * Calling lastString() should not advance the distribution or have any side effects. If nextString() has not yet 
 	 * been called, lastString() should return something reasonable.
 	 */
+	@Override
 	public String lastString()
 	{
 		if (_lastvalue==null)

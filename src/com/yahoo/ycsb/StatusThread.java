@@ -32,6 +32,7 @@ class StatusThread extends Thread
 	/**
 	 * Run and periodically report status.
 	 */
+	@Override
 	public void run()
 	{
 		long st=System.currentTimeMillis();

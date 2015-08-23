@@ -10,13 +10,10 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
 
-import org.voltdb.VoltTable;
-import org.voltdb.VoltTableRow;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientResponse;
 import org.voltdb.client.ProcCallException;
 
-import com.yahoo.ycsb.ByteArrayByteIterator;
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DB;
 import com.yahoo.ycsb.DBException;
@@ -80,6 +77,7 @@ public class FrugalDBClient extends DB {
 	 * Initialize any state for this DB.
 	 * Called once per DB instance; there is one DB instance per client thread.
 	 */
+	@Override
 	public void init(int id) throws DBException
 	{
 		this.idInMysql = id;
@@ -98,6 +96,7 @@ public class FrugalDBClient extends DB {
 	 * Cleanup any state for this DB.
 	 * Called once per DB instance; there is one DB instance per client thread.
 	 */
+	@Override
 	public void cleanup() throws DBException
 	{
 		try {
@@ -135,6 +134,7 @@ public class FrugalDBClient extends DB {
 	 * @param result A HashMap of field/value pairs for the result
 	 * @return Zero on success, a non-zero error code on error or "not found".
 	 */
+	@Override
 	public int read(String table, String key, Set<String> fields,
 			HashMap<String, ByteIterator> result) {
 		try {
@@ -194,6 +194,7 @@ public class FrugalDBClient extends DB {
 	 * @param result A Vector of HashMaps, where each HashMap is a set field/value pairs for one record
 	 * @return Zero on success, a non-zero error code on error.  See this class's description for a discussion of error codes.
 	 */
+	@Override
 	public int scan(String table, String startkey, int recordcount,
 			Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
 		return 0;
@@ -261,6 +262,7 @@ public class FrugalDBClient extends DB {
 	 * @param values A HashMap of field/value pairs to update in the record
 	 * @return Zero on success, a non-zero error code on error.  See this class's description for a discussion of error codes.
 	 */
+	@Override
 	public int update(String table, String key,
 			HashMap<String, ByteIterator> values) {
 		try {
@@ -302,6 +304,7 @@ public class FrugalDBClient extends DB {
 	 * @param values A HashMap of field/value pairs to insert in the record
 	 * @return Zero on success, a non-zero error code on error.  See this class's description for a discussion of error codes.
 	 */
+	@Override
 	public int insert(String table, String key,
 			HashMap<String, ByteIterator> values) {
 		try {
@@ -353,6 +356,7 @@ public class FrugalDBClient extends DB {
 	 * @param key The record key of the record to delete.
 	 * @return Zero on success, a non-zero error code on error.  See this class's description for a discussion of error codes.
 	 */
+	@Override
 	public int delete(String table, String key) {
 		try {
 			if(isInVoltdb() == false){

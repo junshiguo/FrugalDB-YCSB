@@ -43,7 +43,8 @@ public class TerminatorThread extends Thread {
     System.err.println("Maximum execution time specified as: " + maxExecutionTime + " secs");
   }
   
-  public void run() {
+  @Override
+public void run() {
     try {
       Thread.sleep(maxExecutionTime * 1000);
     } catch (InterruptedException e) {

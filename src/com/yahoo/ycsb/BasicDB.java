@@ -51,7 +51,7 @@ public class BasicDB extends DB
 		{
 			try
 			{
-				Thread.sleep((long)Utils.random().nextInt(todelay));
+				Thread.sleep(Utils.random().nextInt(todelay));
 			}
 			catch (InterruptedException e)
 			{
@@ -64,6 +64,7 @@ public class BasicDB extends DB
 	 * Initialize any state for this DB.
 	 * Called once per DB instance; there is one DB instance per client thread.
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public void init()
 	{
@@ -95,6 +96,7 @@ public class BasicDB extends DB
 	 * @param result A HashMap of field/value pairs for the result
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int read(String table, String key, Set<String> fields, HashMap<String,ByteIterator> result)
 	{
 		delay();
@@ -130,6 +132,7 @@ public class BasicDB extends DB
 	 * @param result A Vector of HashMaps, where each HashMap is a set field/value pairs for one record
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int scan(String table, String startkey, int recordcount, Set<String> fields, Vector<HashMap<String,ByteIterator>> result)
 	{
 		delay();
@@ -164,6 +167,7 @@ public class BasicDB extends DB
 	 * @param values A HashMap of field/value pairs to update in the record
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int update(String table, String key, HashMap<String,ByteIterator> values)
 	{
 		delay();
@@ -193,6 +197,7 @@ public class BasicDB extends DB
 	 * @param values A HashMap of field/value pairs to insert in the record
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int insert(String table, String key, HashMap<String,ByteIterator> values)
 	{
 		delay();
@@ -222,6 +227,7 @@ public class BasicDB extends DB
 	 * @param key The record key of the record to delete.
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int delete(String table, String key)
 	{
 		delay();

@@ -27,7 +27,7 @@ public class FServer {
 		loadThread = new LoadThread();
 		loadThread.start();
 		
-		//set up sockets
+		//set up sockets 
 		ServerSocket serverSocket = new ServerSocket(SocketPort);
 		Socket socket;
 		while((socket = serverSocket.accept()) != null){
@@ -69,6 +69,7 @@ public class FServer {
 		for(int i = 0; i < totalTenant; i++){
 			idss[i] = Integer.parseInt(ids[i]) - 1;
 		}
+		IdMatch.init(totalTenant);
 		IdMatch.initIdMatch(idss);
 		
 		reader.readLine(); //slo line

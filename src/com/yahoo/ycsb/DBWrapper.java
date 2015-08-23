@@ -41,6 +41,7 @@ public class DBWrapper extends DB
 	/**
 	 * Set the properties for this DB.
 	 */
+	@Override
 	public void setProperties(Properties p)
 	{
 		_db.setProperties(p);
@@ -49,6 +50,7 @@ public class DBWrapper extends DB
 	/**
 	 * Get the set of properties for this DB.
 	 */
+	@Override
 	public Properties getProperties()
 	{
 		return _db.getProperties();
@@ -58,6 +60,7 @@ public class DBWrapper extends DB
 	 * Initialize any state for this DB.
 	 * Called once per DB instance; there is one DB instance per client thread.
 	 */
+	@Override
 	public void init() throws DBException
 	{
 		_db.init();
@@ -67,6 +70,7 @@ public class DBWrapper extends DB
 	 * Cleanup any state for this DB.
 	 * Called once per DB instance; there is one DB instance per client thread.
 	 */
+	@Override
 	public void cleanup() throws DBException
 	{
 		_db.cleanup();
@@ -81,6 +85,7 @@ public class DBWrapper extends DB
 	 * @param result A HashMap of field/value pairs for the result
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int read(String table, String key, Set<String> fields, HashMap<String,ByteIterator> result)
 	{
 		long st=System.nanoTime();
@@ -101,6 +106,7 @@ public class DBWrapper extends DB
 	 * @param result A Vector of HashMaps, where each HashMap is a set field/value pairs for one record
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int scan(String table, String startkey, int recordcount, Set<String> fields, Vector<HashMap<String,ByteIterator>> result)
 	{
 		long st=System.nanoTime();
@@ -120,6 +126,7 @@ public class DBWrapper extends DB
 	 * @param values A HashMap of field/value pairs to update in the record
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int update(String table, String key, HashMap<String,ByteIterator> values)
 	{
 		long st=System.nanoTime();
@@ -139,6 +146,7 @@ public class DBWrapper extends DB
 	 * @param values A HashMap of field/value pairs to insert in the record
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int insert(String table, String key, HashMap<String,ByteIterator> values)
 	{
 		long st=System.nanoTime();
@@ -156,6 +164,7 @@ public class DBWrapper extends DB
 	 * @param key The record key of the record to delete.
 	 * @return Zero on success, a non-zero error code on error
 	 */
+	@Override
 	public int delete(String table, String key)
 	{
 		long st=System.nanoTime();

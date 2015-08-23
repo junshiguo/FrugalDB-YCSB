@@ -68,6 +68,7 @@ public class OneMeasurementHistogram extends OneMeasurement
 	/* (non-Javadoc)
 	 * @see com.yahoo.ycsb.OneMeasurement#reportReturnCode(int)
 	 */
+	@Override
 	public synchronized void reportReturnCode(int code)
 	{
 		Integer Icode=code;
@@ -84,6 +85,7 @@ public class OneMeasurementHistogram extends OneMeasurement
 	/* (non-Javadoc)
 	 * @see com.yahoo.ycsb.OneMeasurement#measure(int)
 	 */
+	@Override
 	public synchronized void measure(int latency)
 	{
 		if (latency/1000>=_buckets)

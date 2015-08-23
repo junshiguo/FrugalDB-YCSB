@@ -13,7 +13,7 @@ public class FOffloader extends Offloader {
 
 	@Override
 	public int getWorkloadLimitInMysql() {
-		return 13000;
+		return 14000;
 	}
 
 	public static int voltdbSpace = 2000;

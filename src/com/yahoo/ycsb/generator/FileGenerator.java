@@ -49,6 +49,7 @@ public class FileGenerator extends Generator
 	/**
 	 * Return the next string of the sequence, ie the next line of the file.
 	 */
+	@Override
 	public synchronized String nextString()
 	{
 		try {
@@ -65,6 +66,7 @@ public class FileGenerator extends Generator
 	/**
 	 * Return the previous read line.
 	 */
+	@Override
 	public String lastString()
 	{
 		return current;

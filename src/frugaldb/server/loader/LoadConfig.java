@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class LoadConfig {
-	public static String url = "jdbc:mysql://127.0.0.1/tpcc3000";
+	public static String url = "jdbc:mysql://10.20.2.28/ycsb";
 	public static String username = "remote", password = "remote";
 	public static String voltdbServer = "10.20.2.28";
 	public static String dbname = "tpcc3000";
