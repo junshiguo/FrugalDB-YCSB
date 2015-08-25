@@ -8,7 +8,7 @@ import java.sql.Statement;
 public class CopyData {
 	public static String driver = "com.mysql.jdbc.Driver";
 	public static String server = "10.20.2.28";
-	public static String db = "ycsb";
+	public static String db = "ycsb_icde";
 	public static String url;
 	public static String user = "remote";
 	public static String passwd = "remote";
@@ -17,7 +17,7 @@ public class CopyData {
 	public static Statement stmt;
 	
 	public static void main(String[] args){
-		int startId = 3;
+		int startId = 1;
 		int copyNumber = 1;
 		if(args.length > 0){
 			server = args[0];
@@ -34,25 +34,37 @@ public class CopyData {
 		url= "jdbc:mysql://"+server+"/"+db;
 		
 //		for(int id = startId; id < startId + copyNumber; id++){
+//			copy("usertable0", "userl"+id);
+//		}
+//		copy("users1", "users0");
+//		copy("userm1", "userm0");
+//		copy("userl1", "userl0");
+//		for(int id = 730; id < 740; id++){
+//			copy("users0", "users"+id);
+//		}
+//		for(int id = 2000; id < 3000; id++){
+//			copy("userm0", "userm"+id);
+//		}
+		for(int id = 2370; id < 2500; id++){
+			copy("userl0", "userl"+id);
+		}
+		
+//		recopy(1);
+//		for(int id = 4; id < 1500; id++){
 //			copy(id);
 //		}
-		
-		recopy(1);
-		for(int id = 4; id < 1500; id++){
-			copy(id);
-		}
-		recopy(2);
-		for(int id = 1500; id < 2400; id++){
-			copy(id);
-		}
-		recopy(3);
-		for(int id = 2400; id < 3000; id++){
-			copy(id);
-		}
-		recopy(1);
-		for(int id = 2; id < 4; id++){
-			copy(id);
-		}
+//		recopy(2);
+//		for(int id = 1500; id < 2400; id++){
+//			copy(id);
+//		}
+//		recopy(3);
+//		for(int id = 2400; id < 3000; id++){
+//			copy(id);
+//		}
+//		recopy(1);
+//		for(int id = 2; id < 4; id++){
+//			copy(id);
+//		}
 	}
 	
 	/**
@@ -69,6 +81,22 @@ public class CopyData {
 			stmt.execute("INSERT INTO usertable"+id+" SELECT * FROM usertable0");
 			Long end = System.currentTimeMillis();
 			System.out.println("copy tables for tenant " + id
+					+ ". Time spent: " + (end - start) / 1000F);
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void copy(String tablefrom, String tableto){
+		try {
+			checkConnection();
+			Long start = System.currentTimeMillis();
+			stmt.execute("DROP TABLE IF EXISTS "+tableto);
+			stmt.execute("CREATE TABLE "+tableto+" ( ycsb_key VARCHAR (255) PRIMARY KEY, field0 TEXT, field1 TEXT, field2 TEXT, "
+					+ "field3 TEXT, field4 TEXT, field5 TEXT, field6 TEXT, field7 TEXT, field8 TEXT, field9 TEXT) Engine=InnoDB;");
+			stmt.execute("INSERT INTO "+tableto+" SELECT * FROM "+tablefrom);
+			Long end = System.currentTimeMillis();
+			System.out.println("copy tables for " + tableto
 					+ ". Time spent: " + (end - start) / 1000F);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();

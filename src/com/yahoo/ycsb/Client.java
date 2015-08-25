@@ -414,7 +414,7 @@ public class Client
 			}
 		}
 
-		IdMatch.init(threadcount);
+//		IdMatch.init(threadcount);
 		@SuppressWarnings("rawtypes")
 		Workload workload = null;
 		for (int threadid=0; threadid<threadcount; threadid++)
@@ -424,7 +424,7 @@ public class Client
 
 			try {
 				workload = new FrugalDBWorkload();
-				props.setProperty("recordcount", ""+IdMatch.getRecordCount(threadid));
+//				props.setProperty("recordcount", ""+IdMatch.getRecordCount(threadid));
 				workload.init(props);
 			} catch (WorkloadException e) {
 				e.printStackTrace();
@@ -457,20 +457,20 @@ public class Client
 		int returnstatus = 10;
 		if(dotransactions){
 			try {
-				SocketTask.lauchSockets(props.getProperty("voltdbserver", "127.0.0.1"));
-				String loadfile = props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt");
-				SocketTask.socketSend.sendLoadfile(loadfile);
-				BufferedReader loadReader = new BufferedReader(new FileReader(loadfile));
-				String loadline;
-				while((loadline = loadReader.readLine()) != null){
-					SocketTask.socketSend.send(loadline);
-				}
-				SocketTask.socketSend.send("eof");
-				loadReader.close();
-				SocketTask.socketSend.sendTestType(props.getProperty("testtype", "mysql"));
-				SocketTask.socketSend.sendVoltdbSpace(Integer.parseInt(props.getProperty("voltdbspace", "2000")));
+//				SocketTask.lauchSockets(props.getProperty("voltdbserver", "127.0.0.1"));
+//				String loadfile = props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt");
+//				SocketTask.socketSend.sendLoadfile(loadfile);
+//				BufferedReader loadReader = new BufferedReader(new FileReader(loadfile));
+//				String loadline;
+//				while((loadline = loadReader.readLine()) != null){
+//					SocketTask.socketSend.send(loadline);
+//				}
+//				SocketTask.socketSend.send("eof");
+//				loadReader.close();
+//				SocketTask.socketSend.sendTestType(props.getProperty("testtype", "mysql"));
+//				SocketTask.socketSend.sendVoltdbSpace(Integer.parseInt(props.getProperty("voltdbspace", "2000")));
 				
-				BufferedReader reader = new BufferedReader(new FileReader(loadfile));
+//				BufferedReader reader = new BufferedReader(new FileReader(loadfile));
 				int total_interval = Integer.parseInt(props.getProperty(TOTAL_INTERVAL_FRUGALDB, TOTAL_INTERVAL_FRUGALDB_DEFAULT));
 				int minute_per_interval = Integer.parseInt(props.getProperty(MINUTE_PER_INTERVAL_FRUGALDB, MINUTE_PER_INTERVAL_FRUGALDB_DEFAULT));
 				//start test signal
@@ -478,17 +478,17 @@ public class Client
 					((ClientThread)t).checkOpcount(0);
 				}
 				
-				String firstLine = reader.readLine();
-				String[] firsts = firstLine.split("\\s+");
-				total_interval = Integer.parseInt(firsts[1]);
-				firsts = reader.readLine().trim().split("\\s+");
-				int[] ids = new int[threadcount];
-				for(int i = 0; i < threadcount; i++)
-					ids[i] = Integer.parseInt(firsts[i]) - 1;
-				IdMatch.initIdMatch(ids);
-				for(int i = 0; i < 2+total_interval; i++){
-					reader.readLine();
-				}
+//				String firstLine = reader.readLine();
+//				String[] firsts = firstLine.split("\\s+");
+//				total_interval = Integer.parseInt(firsts[1]);
+//				firsts = reader.readLine().trim().split("\\s+");
+//				int[] ids = new int[threadcount];
+//				for(int i = 0; i < threadcount; i++)
+//					ids[i] = Integer.parseInt(firsts[i]) - 1;
+//				IdMatch.initIdMatch(ids);
+//				for(int i = 0; i < 2+total_interval; i++){
+//					reader.readLine();
+//				}
 				
 				boolean measure = true;
 				if(props.getProperty("measure","true").equals("true")){
@@ -501,19 +501,19 @@ public class Client
 				Thread.sleep(3000); //wait for potential initialization work
 				System.out.println("Starting FrugalDB test. total interval: "+total_interval);
 				for(int interval = 0; interval < total_interval; interval++){
-					SocketTask.socketSend.sendInterval(interval);
+//					SocketTask.socketSend.sendInterval(interval);
 					long vtSum = 0, vqSum = 0, vm = 0;
 					for(int minute = 0; minute < minute_per_interval; minute++){
 						//update opcount to workload, update opdone to 0
-						String line = reader.readLine();
-						if(line == null){
-							System.out.println("Fail to read from load file! Stopping...");
-							reader.close();
-							System.exit(1);
-						}
-						String[] load = line.split("\\s+");
+//						String line = reader.readLine();
+//						if(line == null){
+//							System.out.println("Fail to read from load file! Stopping...");
+//							reader.close();
+//							System.exit(1);
+//						}
+//						String[] load = line.split("\\s+");
 						for(int i = 0; i < threads.size(); i++){
-							((ClientThread) threads.get(i)).checkOpcount(Integer.parseInt(load[i+1]));
+							((ClientThread) threads.get(i)).checkOpcount(opcount);
 							((ClientThread) threads.get(i)).checkOpsdone(-1);
 						}
 						//sleep while client threads do transactions 
@@ -533,13 +533,13 @@ public class Client
 						if(vt > 0)	vm++;
 						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
 					}
-					if(interval != 0 && (vqSum > 1000 || vtSum > 50) && vm > 1){
+					if(interval != 0 && (vqSum > 100 || vtSum > 10) && vm > 1){
 						System.out.println("too many violations, setting return status to 1...");
 						returnstatus = 1;
 //						System.exit(1);
 					}
 				}
-				reader.close();
+//				reader.close();
 				Thread.sleep(3000);
 				for(Thread t : threads){
 					FMeasurement.Measure.add(((ClientThread) t)._workload.measure);
@@ -561,15 +561,15 @@ public class Client
 //      terminator = new TerminatorThread(maxExecutionTime, threads, workload);
 //      terminator.start();
 //    }
-		try {
-			SocketTask.socketSend.sendEnd();
-		} catch (IOException e1) {
-		}
+//		try {
+//			SocketTask.socketSend.sendEnd();
+//		} catch (IOException e1) {
+//		}
 		for(Thread t : threads){
 			((ClientThread) t).getWorkload().requestStop();
 			t.interrupt();
 			try {
-				Thread.sleep(5);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

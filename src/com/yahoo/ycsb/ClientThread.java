@@ -1,5 +1,6 @@
 package com.yahoo.ycsb;
 
+import java.sql.SQLException;
 import java.util.Properties;
 
 import frugaldb.db.FrugalDBClient;
@@ -99,7 +100,12 @@ class ClientThread extends Thread
 		try
 		{
 			_db.init();
-			_db.init(IdMatch.getMysqlId(_threadid));
+			_db.init(_threadid);
+			try {
+				((FrugalDBClient) _db).checkMysqlConnection();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		catch (DBException e)
 		{
@@ -146,12 +152,12 @@ class ClientThread extends Thread
 					
 					//newly added
 					if(this.checkOpsdone(0) == this.checkOpcount(-1)){
-						int freetime = 0;
+//						int freetime = 0;
 						while(this.checkOpsdone(0) == this.checkOpcount(-1)){
 							try
 							{
 								sleep(1000);
-								freetime++;
+//								freetime++;
 							}
 							catch (InterruptedException e)
 							{
@@ -161,9 +167,9 @@ class ClientThread extends Thread
 //								System.out.println("thread "+this._threadid+" stopping...");
 								return;
 							}
-							if(freetime >= 60){
-								((FrugalDBClient) this._db).closeConnection();
-							}
+//							if(freetime >= 60){
+//								((FrugalDBClient) this._db).closeConnection();
+//							}
 						}
 						st=System.currentTimeMillis();
 					}
