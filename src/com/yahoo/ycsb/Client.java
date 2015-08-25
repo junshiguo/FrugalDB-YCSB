@@ -21,9 +21,6 @@ package com.yahoo.ycsb;
 import java.io.*;
 import java.util.*;
 
-import com.yahoo.ycsb.measurements.Measurements;
-import com.yahoo.ycsb.measurements.exporter.MeasurementsExporter;
-import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import frugaldb.db.FrugalDBClient;
@@ -107,53 +104,6 @@ public class Client
 	}
 
 
-	/**
-	 * Exports the measurements to either sysout or a file using the exporter
-	 * loaded from conf.
-	 * @throws IOException Either failed to write to output stream or failed to close it.
-	 */
-	private static void exportMeasurements(Properties props, int throughput)
-			throws IOException
-	{
-		MeasurementsExporter exporter = null;
-		try
-		{
-			// if no destination file is provided the results will be written to stdout
-			OutputStream out;
-			String exportFile = props.getProperty("exportfile");
-			if (exportFile == null)
-			{
-				out = System.out;
-			} else
-			{
-				out = new FileOutputStream(exportFile);
-			}
-
-			// if no exporter is provided the default text one will be used
-			String exporterStr = props.getProperty("exporter", "com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter");
-			try
-			{
-				exporter = (MeasurementsExporter) Class.forName(exporterStr).getConstructor(OutputStream.class).newInstance(out);
-			} catch (Exception e)
-			{
-				System.err.println("Could not find exporter " + exporterStr
-						+ ", will use default text reporter.");
-				e.printStackTrace();
-				exporter = new TextMeasurementsExporter(out);
-			}
-
-			exporter.write("OVERALL", "Throughput(ops/minute)", throughput);
-
-			Measurements.getMeasurements().exportMeasurements(exporter);
-		} finally
-		{
-			if (exporter != null)
-			{
-				exporter.close();
-			}
-		}
-	}
-	
 	public static boolean START_TEST = false;
 	public synchronized static boolean checkStart(boolean toggle){
 		if(toggle){
@@ -362,8 +312,6 @@ public class Client
 			System.exit(0);
 		}
 		
-		long maxExecutionTime = Integer.parseInt(props.getProperty(MAX_EXECUTION_TIME, "0"));
-
 		//get number of threads, target and db
 		threadcount=Integer.parseInt(props.getProperty("threadcount","2000"));
 		dbname=props.getProperty("db","com.yahoo.ycsb.BasicDB");
@@ -371,11 +319,11 @@ public class Client
 		
 		//compute the target throughput
 		double targetperthreadperms=-1;
-		if (target>0)
-		{
-			double targetperthread=((double)target)/((double)threadcount);
-			targetperthreadperms=targetperthread/1000.0;
-		}	 
+//		if (target>0)
+//		{
+//			double targetperthread=((double)target)/((double)threadcount);
+//			targetperthreadperms=targetperthread/1000.0;
+//		}	 
 
 		System.out.println("YCSB Client 0.1");
 		System.out.print("Command line:");
@@ -385,13 +333,6 @@ public class Client
 		}
 		System.out.println();
 		System.err.println("Loading workload...");
-		
-		//show a warning message that creating the workload is taking a while
-		//but only do so if it is taking longer than 2 seconds 
-		//(showing the message right away if the setup wasn't taking very long was confusing people)
-		
-		//set up measurements
-		Measurements.setProperties(props);
 		
 		//run the workload
 
@@ -415,24 +356,24 @@ public class Client
 		}
 
 //		IdMatch.init(threadcount);
-		@SuppressWarnings("rawtypes")
 		Workload workload = null;
+		int user5 = Integer.parseInt(props.getProperty("user5", "0"));
+		int user50 = Integer.parseInt(props.getProperty("user50", "0"));
+		int user500 = Integer.parseInt(props.getProperty("user500", "0"));
+		threadcount = user5 + user50 + user500;
 		for (int threadid=0; threadid<threadcount; threadid++)
 		{
 			DB db=new FrugalDBClient();
 			db.setProperties(props);
-
 			try {
 				workload = new FrugalDBWorkload();
-//				props.setProperty("recordcount", ""+IdMatch.getRecordCount(threadid));
+				props.put("operationcount", "0");
 				workload.init(props);
 			} catch (WorkloadException e) {
 				e.printStackTrace();
 				System.exit(0);
 			}
-
 			Thread t=new ClientThread(db,dotransactions,workload,threadid,threadcount,props,opcount/threadcount,targetperthreadperms);
-
 			threads.add(t);
 			t.start();
 			try {
@@ -442,18 +383,6 @@ public class Client
 			}
 		}
 
-//		StatusThread statusthread=null;
-//
-//		if (status)
-//		{
-//			boolean standardstatus=false;
-//			if (props.getProperty("measurementtype","").compareTo("timeseries")==0) 
-//			{
-//				standardstatus=true;
-//			}	
-//			statusthread=new StatusThread(threads,label,standardstatus);
-//			statusthread.start();
-//		}
 		int returnstatus = 10;
 		if(dotransactions){
 			try {
@@ -513,7 +442,13 @@ public class Client
 //						}
 //						String[] load = line.split("\\s+");
 						for(int i = 0; i < threads.size(); i++){
-							((ClientThread) threads.get(i)).checkOpcount(opcount);
+							if(i < user5){
+								((ClientThread) threads.get(i)).checkOpcount(5);
+							}else if (i < user5 + user50){
+								((ClientThread) threads.get(i)).checkOpcount(50);
+							}else{
+								((ClientThread) threads.get(i)).checkOpcount(500);
+							}
 							((ClientThread) threads.get(i)).checkOpsdone(-1);
 						}
 						//sleep while client threads do transactions 
@@ -533,7 +468,8 @@ public class Client
 						if(vt > 0)	vm++;
 						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
 					}
-					if(interval != 0 && (vqSum > 100 || vtSum > 10) && vm > 1){
+//					if(interval != 0 && (vqSum > 100 || vtSum > 10) && vm > 1){
+					if((vqSum > 100 || vtSum > 10) && vm > 1){						
 						System.out.println("too many violations, setting return status to 1...");
 						returnstatus = 1;
 //						System.exit(1);
@@ -548,23 +484,10 @@ public class Client
 			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
-			maxExecutionTime = 10;
 		}else{
 			Client.checkStart(true);
 		}
 		
-		
-//    Thread terminator = null;
-    
-    //@ this para means the time to wait before stopping all threads after workload done
-//    if (maxExecutionTime > 0) {
-//      terminator = new TerminatorThread(maxExecutionTime, threads, workload);
-//      terminator.start();
-//    }
-//		try {
-//			SocketTask.socketSend.sendEnd();
-//		} catch (IOException e1) {
-//		}
 		for(Thread t : threads){
 			((ClientThread) t).getWorkload().requestStop();
 			t.interrupt();
@@ -585,37 +508,6 @@ public class Client
     }
 		
     System.out.println("threads joined ...");
-//		if (terminator != null && !terminator.isInterrupted()) {
-//      terminator.interrupt();
-//    }
-
-//		if (status)
-//		{
-//			statusthread.interrupt();
-//		}
-
-		try
-		{
-			workload.cleanup();
-		}
-		catch (WorkloadException e)
-		{ 
-			e.printStackTrace();
-			e.printStackTrace(System.out);
-			System.exit(0);
-		}
-		
-		//measurements is done by each minute
-//		try
-//		{
-//			exportMeasurements(props, opsDone, en - st);
-//		} catch (IOException e)
-//		{
-//			System.err.println("Could not export measurements, error: " + e.getMessage());
-//			e.printStackTrace();
-//			System.exit(-1);
-//		}
-
 		System.exit(returnstatus);
 	}
 }
