@@ -533,7 +533,7 @@ public class Client
 						if(vt > 0)	vm++;
 						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
 					}
-					if(interval != 0 && (vqSum > 100 || vtSum > 10) && vm > 1){
+					if((vqSum > 1000 || vtSum > 10) || vm > 1){
 						System.out.println("too many violations, setting return status to 1...");
 						returnstatus = 1;
 //						System.exit(1);
