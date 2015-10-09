@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 
-step500=10
+step500=5
 step50=10
 step5=50		
-user500=110
+user500=45
 user50=0
 user5=0
-index500=10
+index500=9
 index50=0
 lbound=0
 ubound=0
 
-for ((index500=11; index500>=0; index500--))
+for ((index500=9; index500>=0; index500--))
 do
 
 	((user500=index500*step500))
 	((index50=user50/step50))
-	((ubound=index50+32))
+	((ubound=index50+16))
 	((lbound=index50))
-	((index50+=16))
+	((index50+=8))
 	while [ $index50 -ne $lbound ]; do
 		((user50=index50*step50))
 		echo "lbound="${lbound}" ubound="${ubound}" user50="${user50}" user500="${user500}

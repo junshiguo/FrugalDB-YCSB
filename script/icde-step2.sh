@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 
-step500=10
-step50=50
-step5=100		
-user500=130
+step500=5
+step50=10
+step5=50		
+user500=45
 user50=0
 user5=0
-index500=13
+index500=9
 index50=0
 lbound=0
 ubound=0
 
-for ((index500=13; index500>=0; index500--))
+for ((index500=9; index500>=0; index500--))
 do
 
 	((user500=index500*step500))
 	((index50=user50/step50))
-	((ubound=index50+4))
+	((ubound=index50+16))
 	((lbound=index50))
-	((index50+=2))
+	((index50+=8))
 	while [ $index50 -ne $lbound ]; do
 		((user50=index50*step50))
 		echo "lbound="${lbound}" ubound="${ubound}" user50="${user50}" user500="${user500}
-		java -Xmx12192m -Xms4096m -jar FClient-icde2.jar -t -db frugaldb.db.FrugalDBClient -P workloada -p table=userl -p recordcount=15000 -p measure=f -p user5=${user5} -p user50=${user50} -p user500=${user500}
+		java -Xmx12192m -Xms4096m -jar FClient-icde2.jar -t -db frugaldb.db.FrugalDBClient -P workloada -p table=users -p recordcount=5000 -p measure=f -p user5=${user5} -p user50=${user50} -p user500=${user500}
 		resultcode=$?
 		if [ $resultcode -eq 10 ]; then
 			((lbound=index50))
