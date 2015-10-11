@@ -6,6 +6,10 @@ import newhybrid.util.AbstractTenant;
 import newhybrid.util.Offloader;
 
 public class FOffloader extends Offloader {
+	public static int mysqlLimit = 20000;
+	public static void setMysqlLimit(int limit){
+		mysqlLimit = limit;
+	}
 
 	public FOffloader(ArrayList<AbstractTenant> tenants) {
 		super(tenants);
@@ -13,7 +17,7 @@ public class FOffloader extends Offloader {
 
 	@Override
 	public int getWorkloadLimitInMysql() {
-		return 14000;
+		return mysqlLimit;
 	}
 
 	public static int voltdbSpace = 2000;

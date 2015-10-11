@@ -22,6 +22,9 @@ public class FServer {
 	public static LoadThread loadThread;
 	
 	public static void main(String [] args) throws IOException{
+		if(args.length > 0){
+			FOffloader.setMysqlLimit(Integer.parseInt(args[0]));
+		}
 		IdMatch.init(2000);
 		
 		loadThread = new LoadThread();
