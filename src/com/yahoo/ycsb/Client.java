@@ -424,7 +424,7 @@ public class Client
 
 			try {
 				workload = new FrugalDBWorkload();
-				props.setProperty("recordcount", ""+IdMatch.getRecordCount(threadid));
+				props.setProperty("recordcount", "5000");
 				workload.init(props);
 			} catch (WorkloadException e) {
 				e.printStackTrace();
@@ -484,7 +484,7 @@ public class Client
 				firsts = reader.readLine().trim().split("\\s+");
 				int[] ids = new int[threadcount];
 				for(int i = 0; i < threadcount; i++)
-					ids[i] = Integer.parseInt(firsts[i]) - 1;
+					ids[i] = Integer.parseInt(firsts[i]);
 				IdMatch.initIdMatch(ids);
 				for(int i = 0; i < 2+total_interval; i++){
 					reader.readLine();
@@ -503,15 +503,15 @@ public class Client
 				for(int interval = 0; interval < total_interval; interval++){
 					SocketTask.socketSend.sendInterval(interval);
 					long vtSum = 0, vqSum = 0, vm = 0;
+					String line = reader.readLine();
+					if(line == null){
+						System.out.println("Fail to read from load file! Stopping...");
+						reader.close();
+						System.exit(1);
+					}
+					String[] load = line.split("\\s+");
 					for(int minute = 0; minute < minute_per_interval; minute++){
 						//update opcount to workload, update opdone to 0
-						String line = reader.readLine();
-						if(line == null){
-							System.out.println("Fail to read from load file! Stopping...");
-							reader.close();
-							System.exit(1);
-						}
-						String[] load = line.split("\\s+");
 						for(int i = 0; i < threads.size(); i++){
 							((ClientThread) threads.get(i)).checkOpcount(Integer.parseInt(load[i+1]));
 							((ClientThread) threads.get(i)).checkOpsdone(-1);
@@ -533,11 +533,11 @@ public class Client
 						if(vt > 0)	vm++;
 						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
 					}
-					if(interval != 0 && (vqSum > 1000 || vtSum > 50) && vm > 1){
-						System.out.println("too many violations, setting return status to 1...");
-						returnstatus = 1;
-//						System.exit(1);
-					}
+//					if(interval != 0 && (vqSum > 1000 || vtSum > 50) && vm > 1){
+//						System.out.println("too many violations, setting return status to 1...");
+//						returnstatus = 1;
+////						System.exit(1);
+//					}
 				}
 				reader.close();
 				Thread.sleep(3000);

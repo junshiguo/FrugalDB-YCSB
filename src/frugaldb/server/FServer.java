@@ -40,6 +40,9 @@ public class FServer {
 		VMMatch.init();
 	}
 	
+	public static FOffloader getOffloader(){
+		return new FOffloader(tenants); 
+	}
 	public static void setOffloader(String loadfile){
 		try {
 			offloader = readLoad(loadfile);
@@ -67,7 +70,7 @@ public class FServer {
 		String[] ids = reader.readLine().split("\\s+"); //id line
 		int[] idss = new int[totalTenant];
 		for(int i = 0; i < totalTenant; i++){
-			idss[i] = Integer.parseInt(ids[i]) - 1;
+			idss[i] = Integer.parseInt(ids[i]);
 		}
 		IdMatch.init(totalTenant);
 		IdMatch.initIdMatch(idss);
@@ -87,8 +90,8 @@ public class FServer {
 			for(int j = 0; j < totalTenant; j++){
 				((FTenant) tenants.get(j)).setWorkload(i, Integer.parseInt(elements[j+1]));
 			}
-			for(int j = 0; j < 4; j++)
-				reader.readLine();
+//			for(int j = 0; j < 4; j++)
+//				reader.readLine();
 		}
 		reader.close();
 		

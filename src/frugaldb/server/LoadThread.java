@@ -41,7 +41,7 @@ public class LoadThread extends Thread {
 		_offload = 0;
 		while(true){
 			if(getSemaphore() > 0){
-				doOffload(FServer.offloader.getOffloaderTenants());
+				doOffload(FServer.getOffloader().getOffloaderTenants());
 				decreaseSemaphore();
 			}else{
 				try {
