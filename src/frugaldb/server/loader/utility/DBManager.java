@@ -16,6 +16,24 @@ public class DBManager {
 		connectDB("jdbc:mysql://10.171.5.62:3306", "kevin", "123456");
 	}
 	
+	public static Connection checkMysqlConn(Connection conn, String url, String username, String password){
+		try {
+			if(conn == null || conn.isClosed()){
+				return connectDB(url, username, password);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return conn;
+	}
+	
+	public static Client checkVoltdbConn(Client vc, String server){
+		if(vc == null){
+			return connectVoltdb(server);
+		}
+		return vc;
+	}
+	
 	public static Connection checkMysqlConn(Connection conn){
 		try {
 			if(conn == null || conn.isClosed()){

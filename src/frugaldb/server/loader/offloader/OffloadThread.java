@@ -11,7 +11,6 @@ import frugaldb.server.FServer;
 import frugaldb.server.FTenant;
 import frugaldb.server.loader.VMMatch;
 import frugaldb.server.loader.utility.DBManager;
-import frugaldb.utility.IdMatch;
 
 public class OffloadThread extends Thread {
 	public static ArrayList<Integer> toLoad = new ArrayList<Integer>(); //a list of ids that are to be offloaded
@@ -43,7 +42,7 @@ public class OffloadThread extends Thread {
 			OffloadInBulk loader = new OffloadInBulk(next, vid, conn, voltdbConn);
 			long start = System.nanoTime();
 			loader.load();
-			((FTenant) FServer.tenants.get(IdMatch.getThreadId(next))).set2Voltdb(vid);
+			((FTenant) FServer.tenants.get(next)).set2Voltdb(vid);
 			long end = System.nanoTime();
 			DecimalFormat df = new DecimalFormat(".0000");
 			System.out.println("Tenant "+next+" MySQL ---> VoltDB! Time spent: "+df.format((end-start)/1000000000.0)+" seconds!");

@@ -24,7 +24,7 @@ public class Voltdb2Mysql {
 		this.client = client;
 	}
 	
-	public void run(){
+	public void load(){
 		try {
 			conn.setAutoCommit(false);
 			PreparedStatement[] statements = new PreparedStatement[2];
@@ -86,6 +86,8 @@ public class Voltdb2Mysql {
 				}
 			}
 			
+			statements[0].close();
+			statements[1].close();
 			client.callProcedure("@AdHoc", "DELETE FROM usertable"+volumnId+" WHERE tenant_id = "+tenantId);
 		} catch (SQLException | IOException | ProcCallException e) {
 			e.printStackTrace();

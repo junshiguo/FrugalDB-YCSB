@@ -3,8 +3,6 @@ package com.yahoo.ycsb;
 import java.util.Properties;
 
 import frugaldb.db.FrugalDBClient;
-import frugaldb.utility.IdMatch;
-
 
 /**
  * A thread for executing transactions or data inserts to the database.
@@ -99,7 +97,7 @@ class ClientThread extends Thread
 		try
 		{
 			_db.init();
-			_db.init(IdMatch.getMysqlId(_threadid));
+			_db.init(_threadid);
 		}
 		catch (DBException e)
 		{

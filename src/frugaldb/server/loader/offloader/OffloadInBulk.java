@@ -46,6 +46,7 @@ public class OffloadInBulk {
 //			file.delete();
 			
 			stmt.execute(getSQL());
+			stmt.close();
 			client.callProcedure("@AdHoc", "delete from usertable"+volumnId+" where tenant_id = "+tenantId);
 			
 			FileReader filereader = new FileReader(LoadConfig.csvPath+"/usertable"+tenantId+".csv");

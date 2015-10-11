@@ -199,58 +199,6 @@ public class FrugalDBClient extends DB {
 			Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
 		return 0;
 		//TODO: key not integer
-//		try {
-//			if(checkInVoltdb(false, false)){
-//				checkMysqlConnection();
-//				String sql = "SELECT ";
-//				if(fields == null){
-//					sql += "*";
-//				}else{
-//					for(String f : fields){
-//						sql += f+",";
-//					}
-//					sql = sql.substring(0, sql.length()-1);
-//				}
-//				sql += " FROM "+table+idInMysql+" WHERE key >= "+startkey+" AND key <= "+(startkey+recordcount);
-//				ResultSet rs = mysqlStmt.executeQuery(sql);
-////				while(rs.next()){
-////					HashMap<String, ByteIterator> tmp = new HashMap<String, ByteIterator>();
-////					ResultSetMetaData rsmd = rs.getMetaData();
-////					for(int i = 0; i < rsmd.getColumnCount(); i++){
-////						tmp.put(rsmd.getColumnName(i), new ByteArrayByteIterator(rs.getString(i).getBytes()));
-////					}
-////					result.addElement(tmp);
-////				}
-//			}else{
-//				checkVoltdbConnection();
-//				String sql = "SELECT ";
-//				if(fields == null){
-//					sql += "*";
-//				}else{
-//					for(String f : fields){
-//						sql += f+",";
-//					}
-//					sql = sql.substring(0, sql.length()-1);
-//				}
-//				sql += " FROM "+table+idInVoltdb+" WHERE key >= "+startkey+" AND key <= "+(startkey+recordcount)+" AND tenantId = "+idInMysql;
-//				ClientResponse response = voltdbConn.callProcedure("@AdHoc", sql);
-////				if(response.getStatus() == ClientResponse.SUCCESS && response.getResults()[0].getRowCount() != 0){
-////					VoltTable results = response.getResults()[0];
-////					for (int i = 0; i < results.getRowCount(); i++) {
-////						VoltTableRow row = results.fetchRow(i);
-////						HashMap<String, ByteIterator> tmp = new HashMap<String, ByteIterator>();
-////						for(int i1 = 0; i1 < results.getColumnCount(); i1++){
-////							tmp.put(results.getColumnName(i1), new ByteArrayByteIterator(row.getString(i1).getBytes()));
-////						}
-////						result.addElement(tmp);
-////					}
-////				}
-//			}
-//		} catch (SQLException | IOException | ProcCallException e) {
-//			e.printStackTrace();
-//			return 1;
-//		}
-//		return 0;
 	}
 
 	/**

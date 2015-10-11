@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import frugaldb.server.loader.VMMatch;
-import frugaldb.utility.IdMatch;
 import newhybrid.util.AbstractTenant;
 
 public class FServer {
@@ -22,8 +21,6 @@ public class FServer {
 	public static LoadThread loadThread;
 	
 	public static void main(String [] args) throws IOException{
-		IdMatch.init(2000);
-		
 		loadThread = new LoadThread();
 		loadThread.start();
 		
@@ -69,9 +66,7 @@ public class FServer {
 		for(int i = 0; i < totalTenant; i++){
 			idss[i] = Integer.parseInt(ids[i]) - 1;
 		}
-		IdMatch.init(totalTenant);
-		IdMatch.initIdMatch(idss);
-		
+
 		reader.readLine(); //slo line
 		line = reader.readLine().trim(); //ds
 		elements = line.split("\\s+");

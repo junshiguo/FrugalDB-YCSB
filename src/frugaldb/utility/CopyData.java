@@ -8,7 +8,7 @@ import java.sql.Statement;
 public class CopyData {
 	public static String driver = "com.mysql.jdbc.Driver";
 	public static String server = "10.20.2.28";
-	public static String db = "ycsb";
+	public static String db = "ycsb_icde_compare";
 	public static String url;
 	public static String user = "remote";
 	public static String passwd = "remote";
@@ -33,26 +33,26 @@ public class CopyData {
 		}
 		url= "jdbc:mysql://"+server+"/"+db;
 		
-//		for(int id = startId; id < startId + copyNumber; id++){
+		for(int id = startId; id < startId + copyNumber; id++){
+			copy(id);
+		}
+		
+//		recopy(1);
+//		for(int id = 4; id < 1500; id++){
 //			copy(id);
 //		}
-		
-		recopy(1);
-		for(int id = 4; id < 1500; id++){
-			copy(id);
-		}
-		recopy(2);
-		for(int id = 1500; id < 2400; id++){
-			copy(id);
-		}
-		recopy(3);
-		for(int id = 2400; id < 3000; id++){
-			copy(id);
-		}
-		recopy(1);
-		for(int id = 2; id < 4; id++){
-			copy(id);
-		}
+//		recopy(2);
+//		for(int id = 1500; id < 2400; id++){
+//			copy(id);
+//		}
+//		recopy(3);
+//		for(int id = 2400; id < 3000; id++){
+//			copy(id);
+//		}
+//		recopy(1);
+//		for(int id = 2; id < 4; id++){
+//			copy(id);
+//		}
 	}
 	
 	/**

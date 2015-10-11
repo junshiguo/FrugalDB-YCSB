@@ -15,6 +15,7 @@ public class LoadConfig {
 	public static int VTableNumber = 50; //not configured by file.
 	public static int M2VConcurrency = 3;
 	public static int V2MConcurrency = 10;
+	public static int M2MConcurrency = 3;
 	public static int loadStart = 1500;
 	public static int loadNumber = 10;
 	public static int M2VMode = 0; //0: BulkPro linear,  1: BulkPro, 2: Bulk, 3: Threading, 4: Basic
@@ -34,6 +35,7 @@ public class LoadConfig {
 		loadStart = Integer.parseInt(prop.getProperty("loadStart", "0"));
 		loadNumber = Integer.parseInt(prop.getProperty("loadNumber", "10"));
 		M2VMode = Integer.parseInt(prop.getProperty("M2VMode", "0"));
+		M2MConcurrency = Integer.parseInt(prop.getProperty("M2MConcurrency", "3"));
 	}
 
 }

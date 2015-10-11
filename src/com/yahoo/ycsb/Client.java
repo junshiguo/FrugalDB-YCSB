@@ -27,7 +27,6 @@ import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import frugaldb.db.FrugalDBClient;
-import frugaldb.utility.IdMatch;
 import frugaldb.workload.FMeasurement;
 import frugaldb.workload.FrugalDBWorkload;
 
@@ -163,7 +162,7 @@ public class Client
 	}
 	public static Vector<Thread> threads=new Vector<Thread>();
 	public static void setVoltdb(int mid, int vid){
-		((ClientThread)threads.get(IdMatch.getThreadId(mid))).setVoltdb(vid);
+		((ClientThread)threads.get(mid)).setVoltdb(vid);
 	}
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args)
@@ -414,7 +413,6 @@ public class Client
 			}
 		}
 
-		IdMatch.init(threadcount);
 		@SuppressWarnings("rawtypes")
 		Workload workload = null;
 		for (int threadid=0; threadid<threadcount; threadid++)
@@ -424,7 +422,7 @@ public class Client
 
 			try {
 				workload = new FrugalDBWorkload();
-				props.setProperty("recordcount", ""+IdMatch.getRecordCount(threadid));
+				props.setProperty("recordcount", "5000");
 				workload.init(props);
 			} catch (WorkloadException e) {
 				e.printStackTrace();
@@ -485,7 +483,6 @@ public class Client
 				int[] ids = new int[threadcount];
 				for(int i = 0; i < threadcount; i++)
 					ids[i] = Integer.parseInt(firsts[i]) - 1;
-				IdMatch.initIdMatch(ids);
 				for(int i = 0; i < 2+total_interval; i++){
 					reader.readLine();
 				}
