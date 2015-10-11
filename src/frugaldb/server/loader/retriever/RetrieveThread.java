@@ -8,17 +8,16 @@ import java.util.List;
 import org.voltdb.client.Client;
 
 import frugaldb.server.FServer;
-import frugaldb.server.FTenant;
-import frugaldb.server.loader.VMMatch;
+import frugaldb.server.loader.Tomove;
 import frugaldb.server.loader.utility.DBManager;
 
 public class RetrieveThread extends Thread {
-	public static List<Integer> toRetrive = new ArrayList<Integer>();
-	public static void setToRetrive(ArrayList<Integer> to){
-		toRetrive = new ArrayList<Integer>(to);
+	public static List<Tomove> toRetrive = new ArrayList<Tomove>();
+	public static void setToRetrive(ArrayList<Tomove> to){
+		toRetrive = new ArrayList<Tomove>(to);
 	}
-	public static synchronized int nextToRetrive(){
-		int ret = -1;
+	public static synchronized Tomove nextToRetrive(){
+		Tomove ret = null;
 		if(toRetrive.isEmpty() == false){
 			ret = toRetrive.get(0);
 			toRetrive.remove(0);
@@ -30,21 +29,17 @@ public class RetrieveThread extends Thread {
 	public Client voltdbConn;
 	@Override
 	public void run(){
-		int next;
-		while((next = RetrieveThread.nextToRetrive()) != -1){
-			int vid = VMMatch.findTenant(next);
-			if(vid == -1) continue;
+		Tomove next;
+		while((next = RetrieveThread.nextToRetrive()) != null){
 			conn = DBManager.checkMysqlConn(conn);
 			voltdbConn = DBManager.checkVoltdbConn(voltdbConn);
-			Voltdb2Mysql m = new Voltdb2Mysql(next, vid, conn, voltdbConn);
+			Voltdb2Mysql m = new Voltdb2Mysql(next.Mid, next.Vid, conn, voltdbConn);
 			long start = System.nanoTime();
 			m.load();
-			((FTenant) FServer.tenants.get(next)).set2Mysql();
-			VMMatch.deleteMatch(vid, next);
 			long end = System.nanoTime();
 			System.out.println("Tenant "+next+" VoltDB ---> MySQL! Time: "+(end - start)/1000000000.0+" seconds...");
 			try {
-				FServer.socketSend.sendV2M(next);
+				FServer.socketSend.sendV2M(next.Mid);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

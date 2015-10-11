@@ -6,10 +6,11 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class LoadConfig {
-	public static String url = "jdbc:mysql://10.20.2.28/ycsb";
+	public static String url = "jdbc:mysql://10.171.5.28/ycsb";
 	public static String username = "remote", password = "remote";
+	public static String mysqlServer = "10.171.5.28";
 	public static String voltdbServer = "10.20.2.28";
-	public static String dbname = "tpcc3000";
+	public static String dbname = "ycsb_icde_compare";
 	public static String csvPath = "/tmp/tmp";
 	public static int batch = 200;
 	public static int VTableNumber = 50; //not configured by file.
@@ -23,9 +24,10 @@ public class LoadConfig {
 	public static void configure() throws FileNotFoundException, IOException{
 		Properties prop = new Properties();
 		prop.load(new FileInputStream("load.conf"));
-		voltdbServer = prop.getProperty("server", "127.0.0.1");
+		voltdbServer = prop.getProperty("vserver", "127.0.0.1");
 		dbname = prop.getProperty("dbname", "tpcc3000");
-		url = "jdbc:mysql://"+voltdbServer+"/"+dbname;
+		mysqlServer = prop.getProperty("mserver");
+		url = "jdbc:mysql://"+mysqlServer+"/"+dbname;
 		username = prop.getProperty("MUsername", "remote");
 		password = prop.getProperty("MPassword", "remote");
 		csvPath = prop.getProperty("csvPath", "/tmp");

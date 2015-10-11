@@ -9,7 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import frugaldb.server.loader.VMMatch;
 import newhybrid.util.AbstractTenant;
 
 public class FServer {
@@ -17,7 +16,6 @@ public class FServer {
 	public static int SocketPort = 8899;
 	public static FSocketTask socketReceive;
 	public static FSocketTask socketSend;
-	public static FOffloader offloader;
 	public static LoadThread loadThread;
 	
 	public static void main(String [] args) throws IOException{
@@ -31,63 +29,6 @@ public class FServer {
 			lauchSocket(socket);
 		}
 		serverSocket.close();
-	}
-	
-	public static void resetVMMacth(){
-		VMMatch.init();
-	}
-	
-	public static void setOffloader(String loadfile){
-		try {
-			offloader = readLoad(loadfile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static ArrayList<AbstractTenant> tenants = new ArrayList<AbstractTenant>();
-	/**
-	 * read from loadfile, initial a new offloader decision
-	 * 
-	 * called when FSocketTask receives "loadfile filename"
-	 * @param loadfile
-	 * @throws IOException
-	 */
-	public static FOffloader readLoad(String loadfile) throws IOException{
-		//initial tenants
-		int intervalNumber, totalTenant;
-		BufferedReader reader = new BufferedReader(new FileReader(loadfile));
-		String line = reader.readLine().trim();
-		String[] elements = line.split("\\s+");
-		totalTenant = Integer.parseInt(elements[0]);
-		intervalNumber = Integer.parseInt(elements[1]);
-		String[] ids = reader.readLine().split("\\s+"); //id line
-		int[] idss = new int[totalTenant];
-		for(int i = 0; i < totalTenant; i++){
-			idss[i] = Integer.parseInt(ids[i]) - 1;
-		}
-
-		reader.readLine(); //slo line
-		line = reader.readLine().trim(); //ds
-		elements = line.split("\\s+");
-		tenants = new ArrayList<AbstractTenant>();
-		for(int i = 0; i < totalTenant; i++){
-			tenants.add(new FTenant(Integer.parseInt(ids[i]) - 1, Integer.parseInt(elements[i]), intervalNumber));
-		}
-		for(int i = 0; i < intervalNumber; i++)
-			reader.readLine();
-		for(int i = 0; i < intervalNumber; i++){
-			line = reader.readLine().trim();
-			elements = line.split("\\s+");
-			for(int j = 0; j < totalTenant; j++){
-				((FTenant) tenants.get(j)).setWorkload(i, Integer.parseInt(elements[j+1]));
-			}
-			for(int j = 0; j < 4; j++)
-				reader.readLine();
-		}
-		reader.close();
-		
-		return new FOffloader(tenants);
 	}
 	
 	/**

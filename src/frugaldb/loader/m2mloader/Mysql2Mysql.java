@@ -17,15 +17,15 @@ public class Mysql2Mysql {
 		this.connLocal = connLocal;
 		this.connRemote = connRemote;
 	}
-	
+	//select from usertable0
 	public String getExportSQL(){
-		String ret = "select * from usertable"+tenantId+" into outfile '"+LoadConfig.csvPath+"/usertable"+tenantId+".csv'"
-				+ " FIELDS TERMINATED BY \'','\' ENCLOSED BY \'\"\';";
+		String ret = "select * from usertable0 into outfile '"+LoadConfig.csvPath+"/usertable"+tenantId+".csv'"
+				+ " FIELDS TERMINATED BY \"','\" ENCLOSED BY \'\"\';";
 		return ret;
 	}
 	public String getImportSQL(){
 		String ret = "LOAD DATA LOCAL INFILE '"+LoadConfig.csvPath+"/usertable"+tenantId+".csv'"
-				+ " INTO TABLE usertable"+tenantId+" FIELDS TERMINATED BY \'','\' ENCLOSED BY \'\"\';";
+				+ " INTO TABLE usertable"+tenantId+" FIELDS TERMINATED BY \"','\" ENCLOSED BY \'\"\';";
 		return ret;
 	}
 	
@@ -34,14 +34,15 @@ public class Mysql2Mysql {
 			Statement stmt = connLocal.createStatement();
 			
 			//delete file before export to csv
-//			File file = new File(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
-//			file.delete();
+			File file = new File(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
+			file.delete();
 			stmt.execute(getExportSQL());
 			
 			Statement stmtRemote = connRemote.createStatement();
+			stmtRemote.execute("TRUNCATE TABLE usertable"+tenantId);
 			stmtRemote.execute(getImportSQL());
-//			File file = new File(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
-//			file.delete();
+			File file2 = new File(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
+			file2.delete();
 			stmt.close();
 			stmtRemote.close();
 		} catch (SQLException e) {

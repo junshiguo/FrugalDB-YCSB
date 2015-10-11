@@ -21,9 +21,10 @@ public class LoaderMain extends Thread {
 		init();
 		cleanTmpFile();
 		int number = LoadConfig.loadNumber;
-		ArrayList<Integer> list = new ArrayList<Integer>();
+		ArrayList<Tomove> list = new ArrayList<Tomove>();
+		int index = 0;
 		for(int i = 0; i < number; i++){
-			list.add(i + LoadConfig.loadStart);
+			list.add(new Tomove(i + LoadConfig.loadStart, (++index)%50));
 		}
 		long start = System.nanoTime();
 		load(list);
@@ -49,7 +50,7 @@ public class LoaderMain extends Thread {
 	 * load data from mysql to voltdb. 
 	 * @param toLoad a list of tenant ids to be loaded
 	 */
-	public static void load(ArrayList<Integer> toLoad){
+	public static void load(ArrayList<Tomove> toLoad){
 		init();
 		OffloadThread.setToLoad(toLoad);
 		OffloadThread[] loaders = new OffloadThread[LoadConfig.M2VConcurrency];
@@ -70,7 +71,7 @@ public class LoaderMain extends Thread {
 	 * retrive data from voltdb to mysql
 	 * @param toRetrive a list of tenant ids to be retrived
 	 */
-	public static void retrive(ArrayList<Integer> toRetrive){
+	public static void retrive(ArrayList<Tomove> toRetrive){
 		init();
 		RetrieveThread.setToRetrive(toRetrive);
 		RetrieveThread[] retrivers = new RetrieveThread[LoadConfig.V2MConcurrency];

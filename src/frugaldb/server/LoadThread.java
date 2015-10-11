@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import newhybrid.util.OffloadTenant;
 import frugaldb.server.loader.LoaderMain;
+import frugaldb.server.loader.Tomove;
 
 public class LoadThread extends Thread {
 	public static int INTERVAL;
@@ -58,11 +59,11 @@ public class LoadThread extends Thread {
 	 * @param offloadTenants
 	 */
 	public void doOffload(ArrayList<OffloadTenant> offloadTenants){
-		ArrayList<Integer> toLoad = new ArrayList<Integer>();
-		ArrayList<Integer> toRetrive = new ArrayList<Integer>();
+		ArrayList<Tomove> toLoad = new ArrayList<Tomove>();
+		ArrayList<Tomove> toRetrive = new ArrayList<Tomove>();
 		for(OffloadTenant tenant : offloadTenants){
 			if(tenant.isToVoltdb()){
-				toLoad.add(tenant.getID());
+				toLoad.add(new Tomove(tenant.getID(),));
 			}else{
 				toRetrive.add(tenant.getID());
 			}
