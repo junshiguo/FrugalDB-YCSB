@@ -9,16 +9,28 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import frugaldb.loader.offloader.OffloadThread;
+import frugaldb.loader.retriever.RetrieveThread;
 import newhybrid.util.AbstractTenant;
 
 public class FServer {
-	public static boolean IS_MYSQL_TEST = true;
 	public static int SocketPort = 8899;
 	public static FSocketTask socketReceive;
 	public static FSocketTask socketSend;
 	public static LoadThread loadThread;
 	
+	public static boolean isMServer = true;
+	
 	public static void main(String [] args) throws IOException{
+		if(args.length > 0){
+			if(args[0].trim().equals("voltdb"))
+				isMServer = false;
+			else if(args[0].trim().equals("mysql"))
+				isMServer = true;
+		}
+		OffloadThread.SOCKET_ACTIVE = true;
+		RetrieveThread.SOCKET_ACTIVE = true;
+		
 		loadThread = new LoadThread();
 		loadThread.start();
 		

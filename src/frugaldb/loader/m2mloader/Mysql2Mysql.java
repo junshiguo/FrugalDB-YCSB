@@ -5,7 +5,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import frugaldb.server.loader.LoadConfig;
+import frugaldb.loader.LoadConfig;
 
 public class Mysql2Mysql {
 	public int tenantId;
@@ -17,9 +17,9 @@ public class Mysql2Mysql {
 		this.connLocal = connLocal;
 		this.connRemote = connRemote;
 	}
-	//select from usertable0
+
 	public String getExportSQL(){
-		String ret = "select * from usertable0 into outfile '"+LoadConfig.csvPath+"/usertable"+tenantId+".csv'"
+		String ret = "select * from usertable"+tenantId+" into outfile '"+LoadConfig.csvPath+"/usertable"+tenantId+".csv'"
 				+ " FIELDS TERMINATED BY \"','\" ENCLOSED BY \'\"\';";
 		return ret;
 	}

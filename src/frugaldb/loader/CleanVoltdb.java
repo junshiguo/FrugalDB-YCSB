@@ -1,4 +1,4 @@
-package frugaldb.server.loader;
+package frugaldb.loader;
 
 import java.io.IOException;
 

@@ -1,16 +1,17 @@
-package frugaldb.server.loader.offloader;
+package frugaldb.loader.offloader;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import frugaldb.server.loader.LoadConfig;
-
 import org.voltdb.client.Client;
 import org.voltdb.client.ProcCallException;
+
+import frugaldb.loader.LoadConfig;
 
 public class OffloadInBulk {
 	public int tenantId;
@@ -41,10 +42,6 @@ public class OffloadInBulk {
 		try {
 			stmt = conn.createStatement();
 			
-			//delete file before export to csv
-//			File file = new File(LoadConfig.csvPath+"/"+tables[tableId]+tenantId+".csv");
-//			file.delete();
-			
 			stmt.execute(getSQL());
 			stmt.close();
 			client.callProcedure("@AdHoc", "delete from usertable"+volumnId+" where tenant_id = "+tenantId);
@@ -70,6 +67,8 @@ public class OffloadInBulk {
 				client.callProcedure("OffloadUsertable"+volumnId, tenantId, lines, count);
 			filereader.close();
 			reader.close();
+			File file = new File(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
+			file.delete();
 		} catch (SQLException | IOException | ProcCallException e) {
 			e.printStackTrace();
 		}

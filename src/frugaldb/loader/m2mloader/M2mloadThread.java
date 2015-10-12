@@ -20,14 +20,21 @@ public class M2mloadThread extends Thread {
 		return ret;
 	}
 	
+	public M2mloadThread(String server){
+		this.localServer = "127.0.0.1";
+		this.remoteServer = server;
+	}
+	
+	public String localServer;
+	public String remoteServer;
 	public Connection connLocal;
 	public Connection connRemote;
 	
 	public void run(){
 		int next;
 		while((next = M2mloadThread.nextToLoad()) != -1){
-			connLocal = DBManager.checkMysqlConn(connLocal, "jdbc:mysql://127.0.0.1/ycsb_icde_compare", "remote", "remote");
-			connRemote = DBManager.checkMysqlConn(connRemote);
+			connLocal = DBManager.checkMysqlConn(connLocal, localServer, "remote", "remote");
+			connRemote = DBManager.checkMysqlConn(connRemote, remoteServer, "remote", "remote");
 			Mysql2Mysql loader = new Mysql2Mysql(next, connLocal, connRemote);
 			long start = System.nanoTime();
 			loader.load();

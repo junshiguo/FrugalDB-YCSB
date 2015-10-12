@@ -1,4 +1,4 @@
-package frugaldb.server.loader;
+package frugaldb.loader;
 
 public class Tomove {
 	public int Mid;

@@ -5,10 +5,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import frugaldb.server.loader.LoadConfig;
-
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientFactory;
+
+import frugaldb.loader.LoadConfig;
 
 public class DBManager {
 	
@@ -16,10 +16,10 @@ public class DBManager {
 		connectDB("jdbc:mysql://10.171.5.62:3306", "kevin", "123456");
 	}
 	
-	public static Connection checkMysqlConn(Connection conn, String url, String username, String password){
+	public static Connection checkMysqlConn(Connection conn, String server, String username, String password){
 		try {
 			if(conn == null || conn.isClosed()){
-				return connectDB(url, username, password);
+				return connectDB( "jdbc:mysql://"+server+"/ycsb", username, password);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

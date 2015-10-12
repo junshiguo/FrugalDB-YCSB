@@ -55,17 +55,11 @@ public class SocketTask extends Thread {
 		writer.write(line+"\n");
 		writer.flush();
 	}
-	public void sendInterval(int in) throws IOException{
-		send("interval "+in);
-	}
-	public void sendLoadfile(String file) throws IOException{
-		send("loadfile "+file);
+	public void sendSemaphore() throws IOException{
+		send("dodataload");
 	}
 	public void sendEnd() throws IOException{
 		send("end");
-	}
-	public void sendVoltdbSpace(int space) throws IOException{
-		send("voltdbspace "+space);
 	}
 	/**
 	 * @param type should be mysql or frugaldb
@@ -93,7 +87,11 @@ public class SocketTask extends Thread {
 				if(info[0].equalsIgnoreCase("end")){
 					break;
 				}else{
-					Client.setVoltdb(Integer.parseInt(info[1]), Integer.parseInt(info[2]));
+					if(info[0].equals("V2C")){
+						Client.setReady(Integer.parseInt(info[0]), false);
+					}else{
+						Client.setVoltdb(Integer.parseInt(info[1]), Integer.parseInt(info[2]));
+					}
 				}
 			}
 			reader.close();

@@ -26,6 +26,17 @@ class ClientThread extends Thread
 	int _threadcount;
 	Object _workloadstate;
 	Properties _props;
+	boolean ready = false;
+	public void setReady(boolean r){
+		checkReady(true, r);
+	}
+	public boolean isReady(){
+		return checkReady(false, false);
+	}
+	public synchronized boolean checkReady(boolean set, boolean value){
+		if(set)	ready = value;
+		return ready;
+	}
 	
 	public void setVoltdb(int id){
 		((FrugalDBClient) _db).setInVoltdb(id);
@@ -135,6 +146,12 @@ class ClientThread extends Thread
 		{
 			if (_dotransactions)
 			{
+				while(this.isReady() == false){
+					try{
+						sleep(1000);
+					}catch (InterruptedException e){}
+				}
+				
 				long st=System.currentTimeMillis();
 
 				//TODO: the first condition is not necessary,_opcount is set by setLoad(int), sleep and interrupt

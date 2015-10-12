@@ -1,4 +1,4 @@
-package frugaldb.server.loader.retriever;
+package frugaldb.loader.retriever;
 
 import java.io.IOException;
 import java.sql.Connection;

@@ -1,12 +1,13 @@
-package frugaldb.server.loader;
+package frugaldb.loader;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.voltdb.client.ProcCallException;
 
-import frugaldb.server.loader.offloader.OffloadThread;
-import frugaldb.server.loader.retriever.RetrieveThread;
+import frugaldb.loader.m2mloader.M2mloadThread;
+import frugaldb.loader.offloader.OffloadThread;
+import frugaldb.loader.retriever.RetrieveThread;
 
 public class LoaderMain extends Thread {
 	
@@ -27,7 +28,7 @@ public class LoaderMain extends Thread {
 			list.add(new Tomove(i + LoadConfig.loadStart, (++index)%50));
 		}
 		long start = System.nanoTime();
-		load(list);
+		offload(list, "10.20.2.28");
 		long end = System.nanoTime();
 		System.out.println("\nLoad "+number+" tenants. Total time: "+(end-start)/1000000000.0+" s.");
 		cleanTmpFile();
@@ -50,12 +51,12 @@ public class LoaderMain extends Thread {
 	 * load data from mysql to voltdb. 
 	 * @param toLoad a list of tenant ids to be loaded
 	 */
-	public static void load(ArrayList<Tomove> toLoad){
+	public static void offload(ArrayList<Tomove> toLoad, String vserver){
 		init();
 		OffloadThread.setToLoad(toLoad);
 		OffloadThread[] loaders = new OffloadThread[LoadConfig.M2VConcurrency];
 		for(int i = 0; i < LoadConfig.M2VConcurrency; i++){
-			loaders[i] = new OffloadThread();
+			loaders[i] = new OffloadThread(vserver);
 			loaders[i].start();
 		}
 		for(int i = 0; i < LoadConfig.M2VConcurrency; i++){
@@ -69,17 +70,34 @@ public class LoaderMain extends Thread {
 	
 	/**
 	 * retrive data from voltdb to mysql
-	 * @param toRetrive a list of tenant ids to be retrived
+	 * @param toRetrieve a list of tenant ids to be retrived
 	 */
-	public static void retrive(ArrayList<Tomove> toRetrive){
+	public static void retrieve(ArrayList<Tomove> toRetrieve, String mserver){
 		init();
-		RetrieveThread.setToRetrive(toRetrive);
+		RetrieveThread.setToRetrive(toRetrieve);
 		RetrieveThread[] retrivers = new RetrieveThread[LoadConfig.V2MConcurrency];
 		for(int i = 0; i < LoadConfig.V2MConcurrency; i++){
-			retrivers[i] = new RetrieveThread();
+			retrivers[i] = new RetrieveThread(mserver);
 			retrivers[i].start();
 		}
 		for(int i = 0; i < LoadConfig.V2MConcurrency; i++){
+			try {
+				retrivers[i].join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void m2mload(ArrayList<Integer> toLoad, String rserver){
+		init();
+		M2mloadThread.setToLoad(toLoad);
+		M2mloadThread[] retrivers = new M2mloadThread[LoadConfig.M2MConcurrency];
+		for(int i = 0; i < LoadConfig.M2MConcurrency; i++){
+			retrivers[i] = new M2mloadThread(rserver);
+			retrivers[i].start();
+		}
+		for(int i = 0; i < LoadConfig.M2MConcurrency; i++){
 			try {
 				retrivers[i].join();
 			} catch (InterruptedException e) {

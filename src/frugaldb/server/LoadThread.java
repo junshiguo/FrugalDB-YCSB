@@ -1,27 +1,17 @@
 package frugaldb.server;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import newhybrid.util.OffloadTenant;
-import frugaldb.server.loader.LoaderMain;
-import frugaldb.server.loader.Tomove;
+import frugaldb.loader.LoadConfig;
+import frugaldb.loader.LoaderMain;
+import frugaldb.loader.Tomove;
 
 public class LoadThread extends Thread {
-	public static int INTERVAL;
-	/**
-	 * interval id counts from 0
-	 * @return
-	 */
-	public static int getIntervalId() {
-		return INTERVAL;
-	}
-	public static void setIntervalId(int intervalId) {
-		INTERVAL = intervalId;
-	}
-	
 	//semaphore, the times to check to offload
-	private int _offload;
+	private int _offload = 0;
 	public int getSemaphore(){
 		return checkOffload(0);
 	}
@@ -38,11 +28,10 @@ public class LoadThread extends Thread {
 	
 	@Override
 	public void run(){
-		INTERVAL = 0;
-		_offload = 0;
+		readToLoad();
 		while(true){
 			if(getSemaphore() > 0){
-				doOffload(FServer.offloader.getOffloaderTenants());
+				doDataLoad();
 				decreaseSemaphore();
 			}else{
 				try {
@@ -58,23 +47,85 @@ public class LoadThread extends Thread {
 	 * socket messages are sent in OffloadThread and RetrieveThread.
 	 * @param offloadTenants
 	 */
-	public void doOffload(ArrayList<OffloadTenant> offloadTenants){
-		ArrayList<Tomove> toLoad = new ArrayList<Tomove>();
-		ArrayList<Tomove> toRetrive = new ArrayList<Tomove>();
-		for(OffloadTenant tenant : offloadTenants){
-			if(tenant.isToVoltdb()){
-				toLoad.add(new Tomove(tenant.getID(),));
-			}else{
-				toRetrive.add(tenant.getID());
-			}
+	public void doDataLoad(){
+		if(FServer.isMServer){
+			ArrayList<Tomove> tmp = m2v.get(0);
+			m2v.remove(0);
+			LoaderMain.offload(tmp, LoadConfig.voltdbServer);
+		}else{
+			ArrayList<Tomove> tmp = v2m.get(0);
+			v2m.remove(0);
+			LoaderMain.retrieve(tmp, LoadConfig.mysqlServer);
+			tmp = v2c.get(0);
+			v2c.remove(0);
+			LoaderMain.retrieve(tmp, LoadConfig.clientServer);
 		}
-		LoaderMain.retrive(toRetrive);
+	}
+	
+	ArrayList<ArrayList<Tomove>> m2v, v2m, v2c;
+//	ArrayList<ArrayList<Integer>> m2c;
+	/**
+	 * discard the first line
+	 */
+	public void readToLoad(){
+		BufferedReader reader = null;
+		String line;
+		String[] elements;
 		try {
-			LoaderMain.cleanTmpFile();
-			LoaderMain.load(toLoad);
-			LoaderMain.cleanTmpFile();
+			if(FServer.isMServer){
+				reader = new BufferedReader(new FileReader("M2V.txt"));
+				reader.readLine();
+				m2v = new ArrayList<>();
+				while((line = reader.readLine()) != null){
+					ArrayList<Tomove> tmp = new ArrayList<>();
+					elements = line.trim().split("\\s+");
+					for(int i = 0; i < elements.length; i+=2){
+						tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+					}
+					m2v.add(tmp);
+				}
+				reader.close();
+				
+//				reader = new BufferedReader(new FileReader("M2C.txt"));
+//				reader.readLine();
+//				m2c = new ArrayList<>();
+//				while((line = reader.readLine()) != null){
+//					ArrayList<Integer> tmp = new ArrayList<>();
+//					elements = line.trim().split("\\s+");
+//					for(int i = 0; i < elements.length; i++){
+//						tmp.add(Integer.parseInt(elements[i]));
+//					}
+//					m2c.add(tmp);
+//				}
+//				reader.close();
+			}else{ //voltdb server
+				reader = new BufferedReader(new FileReader("V2M.txt"));
+				reader.readLine();
+				v2m = new ArrayList<>();
+				while((line = reader.readLine()) != null){
+					ArrayList<Tomove> tmp = new ArrayList<>();
+					elements = line.trim().split("\\s+");
+					for(int i = 0; i < elements.length; i+=2){
+						tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+					}
+					v2m.add(tmp);
+				}
+				reader.close();
+				
+				reader = new BufferedReader(new FileReader("V2C.txt"));
+				reader.readLine();
+				v2c = new ArrayList<>();
+				while((line = reader.readLine()) != null){
+					ArrayList<Tomove> tmp = new ArrayList<>();
+					elements = line.trim().split("\\s+");
+					for(int i = 0; i < elements.length; i+=2){
+						tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+					}
+					v2c.add(tmp);
+				}
+				reader.close();
+			}
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
