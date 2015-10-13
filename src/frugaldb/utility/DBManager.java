@@ -8,10 +8,48 @@ import java.sql.SQLException;
 import org.voltdb.client.Client;
 import org.voltdb.client.ClientFactory;
 
+import frugaldb.loader.LoadConfig;
+
 public class DBManager {
 	
 	public static void main(String[] args){
 		connectDB("jdbc:mysql://10.171.5.62:3306", "kevin", "123456");
+	}
+	
+	public static Connection checkMysqlConn(Connection conn, String server, String username, String password){
+		try {
+			if(conn == null || conn.isClosed()){
+				return connectDB( "jdbc:mysql://"+server+"/ycsb_icde_compare", username, password);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return conn;
+	}
+	
+	public static Client checkVoltdbConn(Client vc, String server){
+		if(vc == null){
+			return connectVoltdb(server);
+		}
+		return vc;
+	}
+	
+	public static Connection checkMysqlConn(Connection conn){
+		try {
+			if(conn == null || conn.isClosed()){
+				return connectDB(LoadConfig.url, LoadConfig.username, LoadConfig.password);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return conn;
+	}
+	
+	public static Client checkVoltdbConn(Client vc){
+		if(vc == null){
+			return connectVoltdb(LoadConfig.voltdbServer);
+		}
+		return vc;
 	}
 	
 	public static Connection connectDB(String url, String username, String password){

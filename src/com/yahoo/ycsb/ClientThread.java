@@ -68,6 +68,7 @@ class ClientThread extends Thread
 		_threadid=threadid;
 		_threadcount=threadcount;
 		_props=props;
+		this.setReady(false);
 		//System.out.println("Interval = "+interval);
 	}
 
@@ -183,6 +184,14 @@ class ClientThread extends Thread
 						st=System.currentTimeMillis();
 					}
 
+					while(this.isReady() == false){
+						if(this.checkOpcount(-1) > 0){
+							System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!data not moved correctly! Tenant "+this._threadid+" !!!!!!!!!!!!!!!!!!!!!!!!");
+						}
+						try{
+							sleep(5000);
+						}catch (InterruptedException e){}
+					}
 					if (!_workload.doTransaction(_db,_workloadstate))
 					{
 						break;

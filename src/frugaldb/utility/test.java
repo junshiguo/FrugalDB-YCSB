@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.text.DecimalFormat;
 
 import frugaldb.loader.m2mloader.Mysql2Mysql;
-import frugaldb.server.loader.utility.DBManager;
 
 public class test {
 	public static void main(String[] args){

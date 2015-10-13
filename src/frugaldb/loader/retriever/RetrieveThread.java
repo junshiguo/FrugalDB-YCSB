@@ -9,7 +9,7 @@ import org.voltdb.client.Client;
 
 import frugaldb.loader.Tomove;
 import frugaldb.server.FServer;
-import frugaldb.server.loader.utility.DBManager;
+import frugaldb.utility.DBManager;
 
 public class RetrieveThread extends Thread {
 	public static boolean SOCKET_ACTIVE = false;
@@ -44,7 +44,7 @@ public class RetrieveThread extends Thread {
 			long start = System.nanoTime();
 			m.load();
 			long end = System.nanoTime();
-			System.out.println("Tenant "+next+" VoltDB ---> MySQL! Time: "+(end - start)/1000000000.0+" seconds...");
+			System.out.println("Tenant "+next.Mid+" VoltDB ---> MySQL! Time: "+(end - start)/1000000000.0+" seconds...");
 			if (SOCKET_ACTIVE) {
 				try {
 					FServer.socketSend.sendV2M(next.Mid);

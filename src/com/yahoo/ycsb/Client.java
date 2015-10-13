@@ -27,6 +27,9 @@ import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import frugaldb.db.FrugalDBClient;
+import frugaldb.loader.LoadConfig;
+import frugaldb.loader.LoaderMain;
+import frugaldb.loader.Tomove;
 import frugaldb.workload.FMeasurement;
 import frugaldb.workload.FrugalDBWorkload;
 
@@ -416,6 +419,11 @@ public class Client
 			}
 		}
 
+		try {
+			LoadConfig.configure();
+		} catch (IOException e2) {
+			e2.printStackTrace();
+		}
 		@SuppressWarnings("rawtypes")
 		Workload workload = null;
 		for (int threadid=0; threadid<threadcount; threadid++)
@@ -446,7 +454,7 @@ public class Client
 		int returnstatus = 10;
 		if(dotransactions){
 			try {
-				SocketTask.lauchSockets(props.getProperty("voltdbserver", "127.0.0.1"));
+				SocketTask.lauchSockets(props.getProperty("mysqlserver", "10.20.2.28"), props.getProperty("voltdbserver", "10.171.5.28"));
 				String loadfile = props.getProperty(WORKLOAD_FILE_FOR_FRUGALDB, "load.txt");
 				
 				BufferedReader reader = new BufferedReader(new FileReader(loadfile));
@@ -461,9 +469,6 @@ public class Client
 				String[] firsts = firstLine.split("\\s+");
 				total_interval = Integer.parseInt(firsts[1]);
 				firsts = reader.readLine().trim().split("\\s+");
-				int[] ids = new int[threadcount];
-				for(int i = 0; i < threadcount; i++)
-					ids[i] = Integer.parseInt(firsts[i]) - 1;
 				for(int i = 0; i < 2+total_interval; i++){
 					reader.readLine();
 				}
@@ -480,6 +485,40 @@ public class Client
 				
 				//TODO: init voltdb data
 				//TODO: set clientThread ready
+				BufferedReader dispatch = new BufferedReader(new FileReader("dispatch.txt"));
+				String dline;
+				boolean first = true;
+				ArrayList<Tomove> list = new ArrayList<>();
+				while((dline = dispatch.readLine()) != null){
+					if(dline.trim().equals("") || dline.startsWith("#")){
+						continue;
+					}
+					String[] elements = dline.trim().split("\\s+");
+					if(first){
+						for(int i = 0; i < 2000;i ++){
+							int store = Integer.parseInt(elements[i]);
+							if(store == 1)
+								((ClientThread)Client.threads.get(i)).setReady(true);
+						}
+						first = false;
+					}else{
+						int vid = 0;
+						for(int i = 0; i < 2000;i ++){
+							int store = Integer.parseInt(elements[i]);
+							if((store == 1) || (store == -1))
+								((ClientThread)Client.threads.get(i)).setReady(true);
+							if(store == -1){
+								((ClientThread)Client.threads.get(i)).setVoltdb(vid%50);
+								vid++;
+							}
+						}
+						break;
+					}
+				}
+				dispatch.close();
+				
+				ServerLoadThread loadThread = new ServerLoadThread();
+				loadThread.start();
 				
 				System.out.println("Starting FrugalDB test. total interval: "+total_interval);
 				for(int interval = 0; interval < total_interval; interval++){
@@ -490,8 +529,12 @@ public class Client
 						System.exit(1);
 					}
 					String[] load = line.split("\\s+");
-					//TODO: send load instructions for interval 1~6
-					SocketTask.socketSend.sendSemaphore();
+					// send load instructions for interval 1~6
+					if(interval > 0 && interval < 7){
+						SocketTask.socketSend[0].sendSemaphore(interval);
+						SocketTask.socketSend[1].sendSemaphore(interval);
+						loadThread.addSemaphore();
+					}
 					
 					long vtSum = 0, vqSum = 0, vm = 0;
 					for(int minute = 0; minute < minute_per_interval; minute++){
@@ -503,19 +546,21 @@ public class Client
 						//sleep while client threads do transactions 
 						Thread.sleep(60*1000);
 						//summary measurements and write to file
-						int vq = 0, vt = 0;
+						int vq = 0, vt = 0, vv=0;
 						for(Thread t : threads){
 							((ClientThread) t)._workload.measure.measurement(((ClientThread) t).checkOpcount(-1), ((ClientThread) t).getOpsDone());
 							int tmp = ((ClientThread) t).checkOpcount(-1) - ((ClientThread) t).getOpsDone();
 							if(tmp > 0){
 								vq += tmp;
 								vt ++;
+								if( ((FrugalDBClient)((ClientThread) t)._db).isInVoltdb())
+									vv++;
 							}
 						}
 						vtSum += vt;
 						vqSum += vq;
 						if(vt > 0)	vm++;
-						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
+						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+"("+vv+") tenants and "+vq+" queries.");
 					}
 //					if(interval != 0 && (vqSum > 1000 || vtSum > 50) && vm > 1){
 //						System.out.println("too many violations, setting return status to 1...");
@@ -546,7 +591,8 @@ public class Client
 //      terminator.start();
 //    }
 		try {
-			SocketTask.socketSend.sendEnd();
+			SocketTask.socketSend[0].sendEnd();
+			SocketTask.socketSend[1].sendEnd();
 		} catch (IOException e1) {
 		}
 		for(Thread t : threads){

@@ -17,18 +17,25 @@ public class SocketTask extends Thread {
 	public static int TYPE_SEND = 0;
 	public static int TYPE_RECEIVE = 1;
 
-	public static SocketTask socketReceive;
-	public static SocketTask socketSend;
+	public static SocketTask[] socketReceive;
+	public static SocketTask[] socketSend;
 	/**
 	 * the Client class is too crowded, thus socket relevant functions are placed here
 	 * @param server
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	public static void lauchSockets(String server) throws UnknownHostException, IOException{
-		socketReceive = new SocketTask(server, SocketTask.TYPE_RECEIVE);
-		socketReceive.start();
-		socketSend = new SocketTask(server, SocketTask.TYPE_SEND);
+	public static void lauchSockets(String mserver, String vserver) throws UnknownHostException, IOException{
+		socketReceive = new SocketTask[2];
+		socketReceive[0] = new SocketTask(mserver, SocketTask.TYPE_RECEIVE);
+		socketReceive[1] = new SocketTask(vserver, SocketTask.TYPE_RECEIVE);
+		socketReceive[0].start();
+		socketReceive[1].start();
+		socketSend = new SocketTask[2];
+		socketSend[0] = new SocketTask(mserver, SocketTask.TYPE_SEND);
+		socketSend[1] = new SocketTask(vserver, SocketTask.TYPE_SEND);
+		socketSend[0].start();
+		socketSend[1].start();
 	}
 	
 	private int type;
@@ -55,8 +62,8 @@ public class SocketTask extends Thread {
 		writer.write(line+"\n");
 		writer.flush();
 	}
-	public void sendSemaphore() throws IOException{
-		send("dodataload");
+	public void sendSemaphore(int interval) throws IOException{
+		send("dodataload "+interval);
 	}
 	public void sendEnd() throws IOException{
 		send("end");

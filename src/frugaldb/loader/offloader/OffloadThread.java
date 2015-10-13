@@ -9,7 +9,7 @@ import org.voltdb.client.Client;
 
 import frugaldb.loader.Tomove;
 import frugaldb.server.FServer;
-import frugaldb.server.loader.utility.DBManager;
+import frugaldb.utility.DBManager;
 
 public class OffloadThread extends Thread {
 	public static boolean SOCKET_ACTIVE = false;
@@ -45,7 +45,7 @@ public class OffloadThread extends Thread {
 			loader.load();
 			long end = System.nanoTime();
 			DecimalFormat df = new DecimalFormat(".0000");
-			System.out.println("Tenant "+next+" MySQL ---> VoltDB! Time spent: "+df.format((end-start)/1000000000.0)+" seconds!");
+			System.out.println("Tenant "+next.Mid+" MySQL ---> VoltDB! Time spent: "+df.format((end-start)/1000000000.0)+" seconds!");
 			if(SOCKET_ACTIVE){
 				try {
 					FServer.socketSend.sendM2V(next.Mid, next.Vid);

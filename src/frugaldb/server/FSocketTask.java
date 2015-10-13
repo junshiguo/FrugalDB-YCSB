@@ -30,16 +30,16 @@ public class FSocketTask extends Thread {
 		writer.flush();
 	}
 	public void sendM2V(int mid, int vid) throws IOException{
-		send("M2V "+mid+" "+vid+"\n");
+		send("M2V "+mid+" "+vid);
 	}
 	public void sendV2M(int mid) throws IOException{
-		send("V2M "+mid+" -1\n");
+		send("V2M "+mid+" -1");
 	}
 	public void sendV2C(int mid) throws IOException{
 		send("V2C "+mid);
 	}
 	public void sendEnd() throws IOException{
-		send("end\n");
+		send("end");
 	}
 	public void clean() throws IOException{
 		sendEnd();

@@ -22,7 +22,7 @@
 #   Default data size: 1 KB records (10 fields, 100 bytes each, plus key)
 #   Request distribution: zipfian
 
-recordcount=10000
+recordcount=5000
 operationcount=1000
 #workload=com.yahoo.ycsb.workloads.CoreWorkload
 workload=frugaldb.workload.FrugalDBWorkload
@@ -38,10 +38,11 @@ insertproportion=0
 requestdistribution=zipfian
 
 db.driver=com.mysql.jdbc.Driver
-db.url=jdbc:mysql://127.0.0.1/ycsb_icde_compare
+db.url=jdbc:mysql://10.20.2.28/ycsb_icde_compare
 db.user=remote
 db.passwd=remote
-voltdbserver=10.20.2.28
+voltdbserver=10.171.5.28
+mysqlserver=10.20.2.28
 
 mmeasurementtype=timeseries
 
@@ -53,4 +54,4 @@ minuteperinterval_F=5
 #histogram.buckets=1000
 #timeseries.granularity=1000
 
-testtype=mysql
+testtype=frugaldb

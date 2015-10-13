@@ -36,6 +36,7 @@ public class FServer {
 		
 		//set up sockets 
 		ServerSocket serverSocket = new ServerSocket(SocketPort);
+		System.out.println("Server started...");
 		Socket socket;
 		while((socket = serverSocket.accept()) != null){
 			lauchSocket(socket);

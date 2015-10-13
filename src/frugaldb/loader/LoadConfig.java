@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class LoadConfig {
-	public static String url = "jdbc:mysql://10.171.5.28/ycsb_icde_compare";
+	public static String url = "jdbc:mysql://10.20.2.28/ycsb_icde_compare";
 	public static String username = "remote", password = "remote";
-	public static String mysqlServer = "10.171.5.28";
-	public static String voltdbServer = "10.20.2.28";
+	public static String mysqlServer = "10.20.2.28";
+	public static String voltdbServer = "10.20.2.30"; //need change
 	public static String clientServer = "10.20.2.20";
 	public static String dbname = "ycsb_icde_compare";
 	public static String csvPath = "/tmp/tmp";

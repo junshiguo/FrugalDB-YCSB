@@ -74,20 +74,20 @@ public class LoadThread extends Thread {
 		try {
 			if(FServer.isMServer){
 				reader = new BufferedReader(new FileReader("M2V.txt"));
-				reader.readLine();
 				m2v = new ArrayList<>();
 				while((line = reader.readLine()) != null){
 					ArrayList<Tomove> tmp = new ArrayList<>();
-					elements = line.trim().split("\\s+");
-					for(int i = 0; i < elements.length; i+=2){
-						tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+					if(line.trim().equals("") == false){
+						elements = line.trim().split("\\s+");
+						for(int i = 0; i < elements.length; i+=2){
+							tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+						}
 					}
 					m2v.add(tmp);
 				}
 				reader.close();
 				
 //				reader = new BufferedReader(new FileReader("M2C.txt"));
-//				reader.readLine();
 //				m2c = new ArrayList<>();
 //				while((line = reader.readLine()) != null){
 //					ArrayList<Integer> tmp = new ArrayList<>();
@@ -100,26 +100,28 @@ public class LoadThread extends Thread {
 //				reader.close();
 			}else{ //voltdb server
 				reader = new BufferedReader(new FileReader("V2M.txt"));
-				reader.readLine();
 				v2m = new ArrayList<>();
 				while((line = reader.readLine()) != null){
 					ArrayList<Tomove> tmp = new ArrayList<>();
-					elements = line.trim().split("\\s+");
-					for(int i = 0; i < elements.length; i+=2){
-						tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+					if(line.trim().equals("") == false){
+						elements = line.trim().split("\\s+");
+						for(int i = 0; i < elements.length; i+=2){
+							tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+						}
 					}
 					v2m.add(tmp);
 				}
 				reader.close();
 				
 				reader = new BufferedReader(new FileReader("V2C.txt"));
-				reader.readLine();
 				v2c = new ArrayList<>();
 				while((line = reader.readLine()) != null){
 					ArrayList<Tomove> tmp = new ArrayList<>();
-					elements = line.trim().split("\\s+");
-					for(int i = 0; i < elements.length; i+=2){
-						tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+					if(line.trim().equals("") == false){
+						elements = line.trim().split("\\s+");
+						for(int i = 0; i < elements.length; i+=2){
+							tmp.add(new Tomove(Integer.parseInt(elements[i]), Integer.parseInt(elements[i+1])));
+						}
 					}
 					v2c.add(tmp);
 				}

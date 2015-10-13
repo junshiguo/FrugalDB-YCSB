@@ -40,6 +40,8 @@ public class OffloadInBulk {
 	 */
 	public void load(){
 		try {
+			File file = new File(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
+			file.delete();
 			stmt = conn.createStatement();
 			
 			stmt.execute(getSQL());
@@ -67,7 +69,7 @@ public class OffloadInBulk {
 				client.callProcedure("OffloadUsertable"+volumnId, tenantId, lines, count);
 			filereader.close();
 			reader.close();
-			File file = new File(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
+			 file = new File(LoadConfig.csvPath+"/usertable"+tenantId+".csv");
 			file.delete();
 		} catch (SQLException | IOException | ProcCallException e) {
 			e.printStackTrace();

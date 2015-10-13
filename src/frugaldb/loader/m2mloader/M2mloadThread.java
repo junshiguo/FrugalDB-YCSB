@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import frugaldb.server.loader.utility.DBManager;
+import frugaldb.utility.DBManager;
 
 public class M2mloadThread extends Thread {
 	public static ArrayList<Integer> toLoad = new ArrayList<Integer>(); //a list of ids that are to be offloaded

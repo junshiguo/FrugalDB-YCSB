@@ -6,12 +6,13 @@ import org.voltdb.client.Client;
 import org.voltdb.client.NoConnectionsException;
 import org.voltdb.client.ProcCallException;
 
-import frugaldb.server.loader.utility.DBManager;
+import frugaldb.utility.DBManager;
 
 public class CleanVoltdb {
 	public static Client client;
 	
 	public static void main(String[] args) throws NoConnectionsException, IOException, ProcCallException, InterruptedException{
+		LoadConfig.configure();
 		clean();
 	}
 	
