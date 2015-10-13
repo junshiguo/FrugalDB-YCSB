@@ -11,7 +11,6 @@ import frugaldb.server.FServer;
 import frugaldb.server.FTenant;
 import frugaldb.server.loader.VMMatch;
 import frugaldb.server.loader.utility.DBManager;
-import frugaldb.utility.IdMatch;
 
 public class RetrieveThread extends Thread {
 	public static List<Integer> toRetrive = new ArrayList<Integer>();
@@ -40,7 +39,7 @@ public class RetrieveThread extends Thread {
 			Voltdb2Mysql m = new Voltdb2Mysql(next, vid, conn, voltdbConn);
 			long start = System.nanoTime();
 			m.run();
-			((FTenant) FServer.tenants.get(IdMatch.getThreadId(next))).set2Mysql();
+			((FTenant) FServer.tenants.get(next)).set2Mysql();
 			VMMatch.deleteMatch(vid, next);
 			long end = System.nanoTime();
 			System.out.println("Tenant "+next+" VoltDB ---> MySQL! Time: "+(end - start)/1000000000.0+" seconds...");

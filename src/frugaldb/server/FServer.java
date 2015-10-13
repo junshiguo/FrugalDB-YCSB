@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import frugaldb.server.loader.VMMatch;
-import frugaldb.utility.IdMatch;
 import newhybrid.util.AbstractTenant;
 
 public class FServer {
@@ -25,7 +24,6 @@ public class FServer {
 		if(args.length > 0){
 			FOffloader.setMysqlLimit(Integer.parseInt(args[0]));
 		}
-		IdMatch.init(2000);
 		
 		loadThread = new LoadThread();
 		loadThread.start();
@@ -44,7 +42,8 @@ public class FServer {
 	}
 	
 	public static FOffloader getOffloader(){
-		return new FOffloader(tenants); 
+//		return new FOffloader(tenants); 
+		return offloader;
 	}
 	public static void setOffloader(String loadfile){
 		try {
@@ -75,8 +74,6 @@ public class FServer {
 		for(int i = 0; i < totalTenant; i++){
 			idss[i] = Integer.parseInt(ids[i]);
 		}
-		IdMatch.init(totalTenant);
-		IdMatch.initIdMatch(idss);
 		
 		reader.readLine(); //slo line
 		line = reader.readLine().trim(); //ds

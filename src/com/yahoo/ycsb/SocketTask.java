@@ -94,6 +94,7 @@ public class SocketTask extends Thread {
 					break;
 				}else{
 					Client.setVoltdb(Integer.parseInt(info[1]), Integer.parseInt(info[2]));
+//					System.out.println(message);
 				}
 			}
 			reader.close();

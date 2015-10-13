@@ -27,7 +27,6 @@ import com.yahoo.ycsb.measurements.exporter.TextMeasurementsExporter;
 import com.yahoo.ycsb.workloads.CoreWorkload;
 
 import frugaldb.db.FrugalDBClient;
-import frugaldb.utility.IdMatch;
 import frugaldb.workload.FMeasurement;
 import frugaldb.workload.FrugalDBWorkload;
 
@@ -163,7 +162,7 @@ public class Client
 	}
 	public static Vector<Thread> threads=new Vector<Thread>();
 	public static void setVoltdb(int mid, int vid){
-		((ClientThread)threads.get(IdMatch.getThreadId(mid))).setVoltdb(vid);
+		((ClientThread)threads.get(mid)).setVoltdb(vid);
 	}
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args)
@@ -414,7 +413,6 @@ public class Client
 			}
 		}
 
-		IdMatch.init(threadcount);
 		@SuppressWarnings("rawtypes")
 		Workload workload = null;
 		for (int threadid=0; threadid<threadcount; threadid++)
@@ -485,7 +483,6 @@ public class Client
 				int[] ids = new int[threadcount];
 				for(int i = 0; i < threadcount; i++)
 					ids[i] = Integer.parseInt(firsts[i]);
-				IdMatch.initIdMatch(ids);
 				for(int i = 0; i < 2+total_interval; i++){
 					reader.readLine();
 				}
@@ -519,19 +516,21 @@ public class Client
 						//sleep while client threads do transactions 
 						Thread.sleep(60*1000);
 						//summary measurements and write to file
-						int vq = 0, vt = 0;
+						int vq = 0, vt = 0, vv = 0;
 						for(Thread t : threads){
 							((ClientThread) t)._workload.measure.measurement(((ClientThread) t).checkOpcount(-1), ((ClientThread) t).getOpsDone());
 							int tmp = ((ClientThread) t).checkOpcount(-1) - ((ClientThread) t).getOpsDone();
 							if(tmp > 0){
 								vq += tmp;
 								vt ++;
+								if(((FrugalDBClient)(((ClientThread) t)._db)).isInVoltdb())
+									vv++;
 							}
 						}
 						vtSum += vt;
 						vqSum += vq;
 						if(vt > 0)	vm++;
-						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+" tenants and "+vq+" queries.");
+						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+"("+vv+") tenants and "+vq+" queries.");
 					}
 //					if(interval != 0 && (vqSum > 1000 || vtSum > 50) && vm > 1){
 //						System.out.println("too many violations, setting return status to 1...");
