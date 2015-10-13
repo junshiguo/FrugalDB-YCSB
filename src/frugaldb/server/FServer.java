@@ -80,7 +80,7 @@ public class FServer {
 		elements = line.split("\\s+");
 		tenants = new ArrayList<AbstractTenant>();
 		for(int i = 0; i < totalTenant; i++){
-			tenants.add(new FTenant(Integer.parseInt(ids[i]) - 1, Integer.parseInt(elements[i]), intervalNumber));
+			tenants.add(new FTenant(Integer.parseInt(ids[i]), Integer.parseInt(elements[i]), intervalNumber));
 		}
 		for(int i = 0; i < intervalNumber; i++)
 			reader.readLine();
