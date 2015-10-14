@@ -29,6 +29,7 @@ class ClientThread extends Thread
 	boolean ready = false;
 	public void setReady(boolean r){
 		checkReady(true, r);
+//		System.out.println("***********Tenant "+_threadid+" set ready to "+(ready?"true":"false")+"***********");
 	}
 	public boolean isReady(){
 		return checkReady(false, false);
@@ -147,12 +148,6 @@ class ClientThread extends Thread
 		{
 			if (_dotransactions)
 			{
-				while(this.isReady() == false){
-					try{
-						sleep(1000);
-					}catch (InterruptedException e){}
-				}
-				
 				long st=System.currentTimeMillis();
 
 				//TODO: the first condition is not necessary,_opcount is set by setLoad(int), sleep and interrupt
@@ -184,15 +179,14 @@ class ClientThread extends Thread
 						st=System.currentTimeMillis();
 					}
 
-					while(this.isReady() == false){
+					if(this.isReady() == false){
 						if(this.checkOpcount(-1) > 0){
 							System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!data not moved correctly! Tenant "+this._threadid+" !!!!!!!!!!!!!!!!!!!!!!!!");
 						}
 						try{
 							sleep(5000);
 						}catch (InterruptedException e){}
-					}
-					if (!_workload.doTransaction(_db,_workloadstate))
+					}else	if (!_workload.doTransaction(_db,_workloadstate))
 					{
 						break;
 					}

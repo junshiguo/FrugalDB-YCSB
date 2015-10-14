@@ -4,9 +4,12 @@ import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import com.yahoo.ycsb.Client;
+
 import frugaldb.utility.DBManager;
 
 public class M2mloadThread extends Thread {
+	public static boolean SOCKET_ACTIVE = false;
 	public static ArrayList<Integer> toLoad = new ArrayList<Integer>(); //a list of ids that are to be offloaded
 	public static void setToLoad(ArrayList<Integer> to){
 		toLoad.addAll(to); // = new ArrayList<Integer>(to);
@@ -39,6 +42,7 @@ public class M2mloadThread extends Thread {
 			long start = System.nanoTime();
 			loader.load();
 			long end = System.nanoTime();
+			Client.setReady(next, true);
 			DecimalFormat df = new DecimalFormat(".0000");
 			System.out.println("Tenant "+next+" MySQL ---> MySQL! Time spent: "+df.format((end-start)/1000000000.0)+" seconds!");
 		}

@@ -52,6 +52,9 @@ public class OffloadThread extends Thread {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+			}else{
+				com.yahoo.ycsb.Client.setReady(next.Mid, true);
+				com.yahoo.ycsb.Client.setVoltdb(next.Mid, next.Vid);
 			}
 		}
 	}

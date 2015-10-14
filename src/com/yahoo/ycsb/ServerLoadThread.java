@@ -80,6 +80,7 @@ public class ServerLoadThread extends Thread {
 						}
 						c2m.add(tmp);
 					}
+					c2m.add(new ArrayList<Integer>());
 					reader.close();
 					
 					reader = new BufferedReader(new FileReader("C2V.txt"));
@@ -95,6 +96,7 @@ public class ServerLoadThread extends Thread {
 						}
 						c2v.add(tmp);
 					}
+					c2v.add(new ArrayList<Tomove>());
 					reader.close();
 			} catch (IOException e) {
 			}

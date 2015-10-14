@@ -517,6 +517,8 @@ public class Client
 				}
 				dispatch.close();
 				
+				SocketTask.socketSend[0].sendReadLoad();
+				SocketTask.socketSend[1].sendReadLoad();
 				ServerLoadThread loadThread = new ServerLoadThread();
 				loadThread.start();
 				
@@ -530,7 +532,7 @@ public class Client
 					}
 					String[] load = line.split("\\s+");
 					// send load instructions for interval 1~6
-					if(interval > 0 && interval < 7){
+					if(interval > 0 && interval <= 7){
 						SocketTask.socketSend[0].sendSemaphore(interval);
 						SocketTask.socketSend[1].sendSemaphore(interval);
 						loadThread.addSemaphore();
@@ -560,7 +562,7 @@ public class Client
 						vtSum += vt;
 						vqSum += vq;
 						if(vt > 0)	vm++;
-						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+"("+vv+") tenants and "+vq+" queries.");
+						System.out.println("Minute "+(interval*minute_per_interval+minute+1)+" finished! Violation: "+vt+"("+vv+") tenants and "+vq+" queries.....................");
 					}
 //					if(interval != 0 && (vqSum > 1000 || vtSum > 50) && vm > 1){
 //						System.out.println("too many violations, setting return status to 1...");

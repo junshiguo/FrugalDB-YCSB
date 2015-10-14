@@ -60,6 +60,9 @@ public class FSocketTask extends Thread {
 				if (info[0].equalsIgnoreCase("dodataload")) {
 					FServer.loadThread.addSemaphore();
 					System.out.println("starting loading data...");
+				}else if(info[0].equalsIgnoreCase("readload")){
+					FServer.loadThread.readToLoad();
+					System.out.println("read load file");
 				}else{
 					//end this socket, does not end the FServer process
 					System.out.println("receive: "+message+". Current test ends...");

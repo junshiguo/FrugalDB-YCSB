@@ -85,22 +85,13 @@ public class LoadThread extends Thread {
 					}
 					m2v.add(tmp);
 				}
+				m2v.add(new ArrayList<Tomove>());
 				reader.close();
 				
-//				reader = new BufferedReader(new FileReader("M2C.txt"));
-//				m2c = new ArrayList<>();
-//				while((line = reader.readLine()) != null){
-//					ArrayList<Integer> tmp = new ArrayList<>();
-//					elements = line.trim().split("\\s+");
-//					for(int i = 0; i < elements.length; i++){
-//						tmp.add(Integer.parseInt(elements[i]));
-//					}
-//					m2c.add(tmp);
-//				}
-//				reader.close();
 			}else{ //voltdb server
 				reader = new BufferedReader(new FileReader("V2M.txt"));
 				v2m = new ArrayList<>();
+				v2m.add(new ArrayList<Tomove>());
 				while((line = reader.readLine()) != null){
 					ArrayList<Tomove> tmp = new ArrayList<>();
 					if(line.trim().equals("") == false){
@@ -115,6 +106,7 @@ public class LoadThread extends Thread {
 				
 				reader = new BufferedReader(new FileReader("V2C.txt"));
 				v2c = new ArrayList<>();
+				v2c.add(new ArrayList<Tomove>());
 				while((line = reader.readLine()) != null){
 					ArrayList<Tomove> tmp = new ArrayList<>();
 					if(line.trim().equals("") == false){

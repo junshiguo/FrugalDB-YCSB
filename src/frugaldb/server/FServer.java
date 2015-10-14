@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import frugaldb.loader.m2mloader.M2mloadThread;
 import frugaldb.loader.offloader.OffloadThread;
 import frugaldb.loader.retriever.RetrieveThread;
 import newhybrid.util.AbstractTenant;
@@ -30,6 +31,7 @@ public class FServer {
 		}
 		OffloadThread.SOCKET_ACTIVE = true;
 		RetrieveThread.SOCKET_ACTIVE = true;
+		M2mloadThread.SOCKET_ACTIVE = true;
 		
 		loadThread = new LoadThread();
 		loadThread.start();

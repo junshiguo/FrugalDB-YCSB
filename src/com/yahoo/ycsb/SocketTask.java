@@ -65,6 +65,9 @@ public class SocketTask extends Thread {
 	public void sendSemaphore(int interval) throws IOException{
 		send("dodataload "+interval);
 	}
+	public void sendReadLoad() throws IOException{
+		send("readload");
+	}
 	public void sendEnd() throws IOException{
 		send("end");
 	}
